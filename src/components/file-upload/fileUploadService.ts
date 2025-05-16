@@ -3,7 +3,7 @@ import type { UploadFile } from './types'
 import { FileUploadStatus } from './types'
 
 // 获取七牛云上传URL
-const QINIU_UPLOAD_URL = import.meta.env.VITE_QINIU_URL
+export const uploadUrl = import.meta.env.VITE_QINIU_URL
 
 /**
  * 上传文件到七牛云
@@ -59,7 +59,7 @@ export async function uploadToQiniu(
 
     // 创建Promise包装XHR请求
     const result = await new Promise<{ success: boolean; url?: string; error?: Error }>((resolve, _reject) => {
-      xhr.open('POST', QINIU_UPLOAD_URL)
+      xhr.open('POST', uploadUrl)
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -73,10 +73,10 @@ export async function uploadToQiniu(
               fileUrl = response.path
             } else if (response?.key) {
               // 如果返回了key，需要构建URL
-              fileUrl = `${QINIU_UPLOAD_URL}/${response.key}`
+              fileUrl = `${uploadUrl}/${response.key}`
             } else if (response?.hash) {
               // 如果返回了hash，需要构建URL
-              fileUrl = `${QINIU_UPLOAD_URL}/${response.hash}`
+              fileUrl = `${uploadUrl}/${response.hash}`
             } else {
               throw new Error('七牛云返回数据格式错误')
             }

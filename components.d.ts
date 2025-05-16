@@ -40,6 +40,7 @@ declare module 'vue' {
     Confetti: typeof import('./src/components/ui/confetti/Confetti.vue')['default']
     ConfettiButton: typeof import('./src/components/ui/confetti/ConfettiButton.vue')['default']
     DirectionAwareHover: typeof import('./src/components/ui/direction-aware-hover/DirectionAwareHover.vue')['default']
+    Editor: typeof import('./src/components/editor/Editor.vue')['default']
     FilePreview: typeof import('./src/components/file-upload/FilePreview.vue')['default']
     FileThumbnail: typeof import('./src/components/file-upload/FileThumbnail.vue')['default']
     FileUpload: typeof import('./src/components/file-upload/FileUpload.vue')['default']
