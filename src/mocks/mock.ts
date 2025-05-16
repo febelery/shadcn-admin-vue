@@ -44,4 +44,13 @@ export const setupMock = (axios: AxiosInstance) => {
       },
     ]
   })
+
+  mock.onGet(/\/qiniu\/uptoken$/).reply((): any => {
+    return [
+      200,
+      {
+        uptoken: 'EsIm1pbWVMaW1pdCI6ImltYWdlLyo7dmlkZW8vKiJ9',
+      },
+    ]
+  })
 }

@@ -39,6 +39,12 @@ declare module 'vue' {
     Checkbox: typeof import('./src/components/ui/checkbox/Checkbox.vue')['default']
     Confetti: typeof import('./src/components/ui/confetti/Confetti.vue')['default']
     ConfettiButton: typeof import('./src/components/ui/confetti/ConfettiButton.vue')['default']
+    DirectionAwareHover: typeof import('./src/components/ui/direction-aware-hover/DirectionAwareHover.vue')['default']
+    FilePreview: typeof import('./src/components/file-upload/FilePreview.vue')['default']
+    FileThumbnail: typeof import('./src/components/file-upload/FileThumbnail.vue')['default']
+    FileUpload: typeof import('./src/components/file-upload/FileUpload.vue')['default']
+    FileUploadInfo: typeof import('./src/components/file-upload/FileUploadInfo.vue')['default']
+    FileUploadZone: typeof import('./src/components/file-upload/FileUploadZone.vue')['default']
     FormControl: typeof import('./src/components/ui/form/FormControl.vue')['default']
     FormDescription: typeof import('./src/components/ui/form/FormDescription.vue')['default']
     FormItem: typeof import('./src/components/ui/form/FormItem.vue')['default']
@@ -80,5 +86,9 @@ declare module 'vue' {
     TableHeader: typeof import('./src/components/ui/table/TableHeader.vue')['default']
     TableRow: typeof import('./src/components/ui/table/TableRow.vue')['default']
     Textarea: typeof import('./src/components/ui/textarea/Textarea.vue')['default']
+    Tooltip: typeof import('./src/components/ui/tooltip/Tooltip.vue')['default']
+    TooltipContent: typeof import('./src/components/ui/tooltip/TooltipContent.vue')['default']
+    TooltipProvider: typeof import('./src/components/ui/tooltip/TooltipProvider.vue')['default']
+    TooltipTrigger: typeof import('./src/components/ui/tooltip/TooltipTrigger.vue')['default']
   }
 }

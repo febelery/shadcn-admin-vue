@@ -31,6 +31,6 @@ export default defineConfig({
   },
   base: './',
   server: {
-    allowedHosts: ['4856891c.r19.vip.cpolar.cn'],
+    allowedHosts: ['40d78388.r40.cpolar.top'],
   },
 })
