@@ -7,6 +7,11 @@ const errors: RouteRecordRaw[] = [
     component: () => import('@/views/errors/401.vue'),
   },
   {
+    path: '/403',
+    name: 'forbidden',
+    component: () => import('@/views/errors/403.vue'),
+  },
+  {
     path: '/500',
     name: 'serverError',
     component: () => import('@/views/errors/500.vue'),

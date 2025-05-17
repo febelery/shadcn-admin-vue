@@ -1,7 +1,5 @@
 <template>
   <div class="relative h-svh w-full overflow-hidden bg-gradient-to-r from-red-50 via-white to-amber-50 text-gray-900">
-    <SmoothCursor />
-
     <!-- 背景装饰 -->
     <div class="absolute inset-0 z-0">
       <!-- 半透明锁形状 -->
