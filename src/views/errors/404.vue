@@ -1,5 +1,7 @@
 <template>
   <div class="relative h-svh w-full overflow-hidden bg-gray-100 text-gray-900">
+    <SmoothCursor />
+
     <div class="absolute inset-0 z-0">
       <div class="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 opacity-70"></div>
       <div

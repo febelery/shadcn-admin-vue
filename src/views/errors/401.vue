@@ -1,5 +1,7 @@
 <template>
   <div class="relative h-svh w-full overflow-hidden bg-gradient-to-r from-red-50 via-white to-amber-50 text-gray-900">
+    <SmoothCursor />
+
     <!-- 背景装饰 -->
     <div class="absolute inset-0 z-0">
       <!-- 半透明锁形状 -->
@@ -141,13 +143,10 @@
             >
               <div class="flex justify-center gap-4">
                 <Button variant="outline" @click="goBack">
-                  <div class="flex items-center">
+                  <div class="relative z-10 flex items-center">
                     <ArrowLeft class="mr-2 h-4 w-4" />
                     返回
                   </div>
-                  <div
-                    class="absolute inset-0 -z-10 bg-gradient-to-r from-gray-100 to-gray-50 opacity-0 transition-opacity group-hover:opacity-100"
-                  ></div>
                 </Button>
 
                 <Button
