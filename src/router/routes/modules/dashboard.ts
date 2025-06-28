@@ -1,5 +1,5 @@
-import type { RouteRecordRaw } from 'vue-router'
 import { LayoutDashboard } from 'lucide-vue-next'
+import type { RouteRecordRaw } from 'vue-router'
 
 const dashboard: RouteRecordRaw = {
   path: '/dashboard',

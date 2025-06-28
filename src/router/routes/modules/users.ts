@@ -1,5 +1,5 @@
+import { Shield, UserCheck, UserPlus, Users } from 'lucide-vue-next'
 import type { RouteRecordRaw } from 'vue-router'
-import { Users, UserPlus, UserCheck, Shield } from 'lucide-vue-next'
 
 const users: RouteRecordRaw = {
   path: '/users',

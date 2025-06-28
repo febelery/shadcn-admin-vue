@@ -53,10 +53,10 @@
           :transition="{ delay: 0.1, type: 'spring', stiffness: 300, damping: 30 }"
           class="text-center select-none"
         >
-          <div class="text-6xl font-light text-white/90 tracking-wider mb-2">
+          <div class="mb-2 text-6xl font-light tracking-wider text-white/90">
             {{ currentTime }}
           </div>
-          <div class="text-lg text-white/60 font-light">
+          <div class="text-lg font-light text-white/60">
             {{ currentDate }}
           </div>
         </Motion>
@@ -69,35 +69,18 @@
         >
           <div class="relative">
             <!-- 外层光晕效果 -->
-            <div 
+            <div
               v-if="isUnlocking"
-              class="absolute inset-0 rounded-full bg-white/10 animate-pulse"
-              style="filter: blur(20px); transform: scale(1.5);"
+              class="absolute inset-0 animate-pulse rounded-full bg-white/10"
+              style="filter: blur(20px); transform: scale(1.5)"
             />
-            
+
             <!-- 圆环进度条 - 增大尺寸 -->
-            <svg
-              class="h-44 w-44 -rotate-90 transform pointer-events-none drop-shadow-2xl"
-              viewBox="0 0 176 176"
-            >
+            <svg class="pointer-events-none h-44 w-44 -rotate-90 transform drop-shadow-2xl" viewBox="0 0 176 176">
               <!-- 背景圆环 -->
-              <circle
-                cx="88"
-                cy="88"
-                r="76"
-                stroke="rgba(255, 255, 255, 0.08)"
-                stroke-width="6"
-                fill="none"
-              />
+              <circle cx="88" cy="88" r="76" stroke="rgba(255, 255, 255, 0.08)" stroke-width="6" fill="none" />
               <!-- 装饰内圆环 -->
-              <circle
-                cx="88"
-                cy="88"
-                r="70"
-                stroke="rgba(255, 255, 255, 0.05)"
-                stroke-width="2"
-                fill="none"
-              />
+              <circle cx="88" cy="88" r="70" stroke="rgba(255, 255, 255, 0.05)" stroke-width="2" fill="none" />
               <!-- 进度圆环 -->
               <circle
                 cx="88"
@@ -112,13 +95,13 @@
                 class="transition-all duration-100 ease-out"
                 :class="{ 'drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]': isUnlocking }"
               />
-              
+
               <!-- 渐变定义 -->
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:rgba(255,255,255,0.9);stop-opacity:1" />
-                  <stop offset="50%" style="stop-color:rgba(255,255,255,0.7);stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:rgba(255,255,255,0.9);stop-opacity:1" />
+                  <stop offset="0%" style="stop-color: rgba(255, 255, 255, 0.9); stop-opacity: 1" />
+                  <stop offset="50%" style="stop-color: rgba(255, 255, 255, 0.7); stop-opacity: 1" />
+                  <stop offset="100%" style="stop-color: rgba(255, 255, 255, 0.9); stop-opacity: 1" />
                 </linearGradient>
               </defs>
             </svg>
@@ -131,19 +114,18 @@
               @pointerleave="stopUnlock"
               @pointercancel="stopUnlock"
               @contextmenu.prevent
-              class="absolute inset-4 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 active:scale-95 border border-white/10 select-none touch-none group"
-              :class="{ 
-                'bg-white/15 scale-95 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.3)]': isUnlocking,
-                'hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]': !isUnlocking
+              class="group absolute inset-4 flex touch-none items-center justify-center rounded-full border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 select-none hover:bg-white/10 active:scale-95"
+              :class="{
+                'scale-95 border-white/20 bg-white/15 shadow-[0_0_30px_rgba(255,255,255,0.3)]': isUnlocking,
+                'hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]': !isUnlocking,
               }"
-              style="touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none;"
             >
               <!-- 解锁图标容器 -->
               <Motion
                 :animate="isUnlocking ? { scale: [1, 1.1, 1] } : { scale: 1 }"
                 :transition="{ duration: 1.2, repeat: isUnlocking ? Infinity : 0, ease: 'easeInOut' }"
               >
-                <div class="relative pointer-events-none">
+                <div class="pointer-events-none relative">
                   <!-- 解锁图标 - 增大图标 -->
                   <svg
                     class="h-16 w-16 text-white/90 transition-all duration-300 group-hover:text-white"
@@ -158,18 +140,18 @@
                       d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
                     />
                   </svg>
-                  
+
                   <!-- 内部脉冲效果 -->
                   <div
                     v-if="isUnlocking"
-                    class="absolute inset-2 rounded-full bg-white/10 animate-ping pointer-events-none"
+                    class="pointer-events-none absolute inset-2 animate-ping rounded-full bg-white/10"
                   />
-                  
+
                   <!-- 外部光环效果 -->
                   <div
                     v-if="isUnlocking"
-                    class="absolute -inset-4 rounded-full bg-white/5 animate-pulse pointer-events-none"
-                    style="animation-delay: 0.5s;"
+                    class="pointer-events-none absolute -inset-4 animate-pulse rounded-full bg-white/5"
+                    style="animation-delay: 0.5s"
                   />
                 </div>
               </Motion>
@@ -177,7 +159,7 @@
               <!-- 进度指示器 -->
               <div
                 v-if="isUnlocking"
-                class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 text-white/70 text-sm font-light"
+                class="absolute -bottom-10 left-1/2 -translate-x-1/2 transform text-sm font-light text-white/70"
               >
                 {{ Math.round(progress) }}%
               </div>
@@ -190,33 +172,22 @@
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ delay: 0.4, type: 'spring', stiffness: 300, damping: 30 }"
-          class="text-center space-y-4 select-none"
+          class="space-y-4 text-center select-none"
         >
           <!-- 主要提示 -->
           <div class="space-y-2">
-            <p class="text-base text-white/80 font-light">
-              长按按钮解锁
-            </p>
-            <div class="flex items-center justify-center space-x-2 text-white/50">
-              <div class="w-1 h-1 rounded-full bg-white/50"></div>
-              <p class="text-sm">
-                按住 3 秒钟
-              </p>
-              <div class="w-1 h-1 rounded-full bg-white/50"></div>
-            </div>
+            <p class="text-base font-light text-white/80">长按解锁</p>
           </div>
-          
+
           <!-- 分隔线 -->
-          <div class="w-24 h-px bg-white/20 mx-auto"></div>
-          
+          <div class="mx-auto h-px w-24 bg-white/20"></div>
+
           <!-- 退出登录选项 -->
           <div class="space-y-2">
-            <p class="text-xs text-white/40">
-              或者
-            </p>
+            <p class="text-xs text-white/40">或者</p>
             <button
               @click="handleLogout"
-              class="text-sm text-white/60 hover:text-white/80 transition-all duration-300 underline underline-offset-4 decoration-white/30 hover:decoration-white/60"
+              class="text-sm text-white/60 underline decoration-white/30 underline-offset-4 transition-all duration-300 hover:text-white/80 hover:decoration-white/60"
             >
               退出登录
             </button>
@@ -224,15 +195,21 @@
         </Motion>
 
         <!-- 装饰性元素 -->
-        <div class="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-white/5 blur-3xl animate-pulse" style="animation-duration: 4s;"></div>
-        <div class="absolute -bottom-20 -right-20 w-32 h-32 rounded-full bg-white/5 blur-2xl animate-pulse" style="animation-duration: 6s; animation-delay: 2s;"></div>
+        <div
+          class="absolute -top-20 -left-20 h-40 w-40 animate-pulse rounded-full bg-white/5 blur-3xl"
+          style="animation-duration: 4s"
+        ></div>
+        <div
+          class="absolute -right-20 -bottom-20 h-32 w-32 animate-pulse rounded-full bg-white/5 blur-2xl"
+          style="animation-duration: 6s; animation-delay: 2s"
+        ></div>
       </Motion>
     </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useLockScreen } from '@/composables/useLockScreen'
@@ -263,16 +240,16 @@ const strokeDashoffset = computed(() => {
 // 更新时间
 function updateTime() {
   const now = new Date()
-  currentTime.value = now.toLocaleTimeString('zh-CN', { 
-    hour: '2-digit', 
+  currentTime.value = now.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: false 
+    hour12: false,
   })
-  currentDate.value = now.toLocaleDateString('zh-CN', { 
+  currentDate.value = now.toLocaleDateString('zh-CN', {
     year: 'numeric',
-    month: 'long', 
+    month: 'long',
     day: 'numeric',
-    weekday: 'long'
+    weekday: 'long',
   })
 }
 
@@ -280,28 +257,28 @@ function startUnlock(event: PointerEvent) {
   // 防止事件冒泡
   event.preventDefault()
   event.stopPropagation()
-  
+
   // 如果已经在解锁过程中，先停止当前进程，然后重新开始
   if (isUnlocking.value) {
     stopUnlock()
   }
-  
+
   // 捕获指针，确保后续事件都能被捕获
   if (unlockButton.value) {
     unlockButton.value.setPointerCapture(event.pointerId)
   }
-  
+
   isUnlocking.value = true
   progress.value = 0
-  
+
   const startTime = Date.now()
-  
+
   // 进度更新定时器
   progressTimer = setInterval(() => {
     const elapsed = Date.now() - startTime
     progress.value = Math.min((elapsed / unlockDuration) * 100, 100)
   }, 16) // 60fps
-  
+
   // 解锁定时器
   unlockTimer = setTimeout(() => {
     completeUnlock()
@@ -314,22 +291,22 @@ function stopUnlock(event?: PointerEvent) {
     event.preventDefault()
     event.stopPropagation()
   }
-  
+
   if (!isUnlocking.value) return
-  
+
   // 释放指针捕获
   if (event && unlockButton.value) {
     unlockButton.value.releasePointerCapture(event.pointerId)
   }
-  
+
   isUnlocking.value = false
   progress.value = 0
-  
+
   if (unlockTimer) {
     clearTimeout(unlockTimer)
     unlockTimer = null
   }
-  
+
   if (progressTimer) {
     clearInterval(progressTimer)
     progressTimer = null
@@ -339,17 +316,17 @@ function stopUnlock(event?: PointerEvent) {
 function completeUnlock() {
   isUnlocking.value = false
   progress.value = 0
-  
+
   if (unlockTimer) {
     clearTimeout(unlockTimer)
     unlockTimer = null
   }
-  
+
   if (progressTimer) {
     clearInterval(progressTimer)
     progressTimer = null
   }
-  
+
   // 解锁成功动画
   toast.success('屏幕已解锁', {
     duration: 2000,
@@ -392,7 +369,8 @@ onUnmounted(() => {
 
 /* 自定义动画 */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -404,4 +382,3 @@ onUnmounted(() => {
   animation: float 6s ease-in-out infinite;
 }
 </style>
-</invoke>

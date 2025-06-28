@@ -1,5 +1,5 @@
+import { Activity, Bell, Database, Settings, Shield } from 'lucide-vue-next'
 import type { RouteRecordRaw } from 'vue-router'
-import { Settings, Database, Shield, Bell, Activity } from 'lucide-vue-next'
 
 const system: RouteRecordRaw = {
   path: '/system',

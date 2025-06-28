@@ -1,5 +1,5 @@
+import { Archive, BookOpen, Clock, Edit3, FileText, FolderOpen, Newspaper, Tags } from 'lucide-vue-next'
 import type { RouteRecordRaw } from 'vue-router'
-import { FileText, Edit3, Archive, Tags, FolderOpen, Newspaper, Clock, BookOpen } from 'lucide-vue-next'
 
 const articles: RouteRecordRaw = {
   path: '/articles',

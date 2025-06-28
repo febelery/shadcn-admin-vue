@@ -208,4 +208,8 @@ onUnmounted(() => {
 :deep(aie-footer) {
   display: none !important;
 }
+:deep(.aie-container) {
+  padding: 3px;
+  border-radius: 12px;
+}
 </style>
