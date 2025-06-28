@@ -1,5 +1,5 @@
 import type { Component, InputHTMLAttributes } from 'vue'
-import type { z, ZodAny } from 'zod'
+import type * as z from 'zod'
 import type { INPUT_COMPONENTS } from './constant'
 
 export interface FieldProps {
@@ -28,6 +28,7 @@ export interface InputComponents {
   number: Component
   string: Component
   file: Component
+  fileUpload: Component
   array: Component
   object: Component
   editor: Component
@@ -43,7 +44,15 @@ export interface ConfigItem {
   /** Hide `FormLabel`. */
   hideLabel?: boolean
   inputProps?: InputHTMLAttributes & {
+    // Editor 相关属性
     mode?: 'full' | 'lite' | 'pure'
+    // FileUpload 相关属性
+    maxFiles?: number
+    acceptedTypes?: string | string[]
+    maxSize?: number
+    autoUpload?: boolean
+    useQiniu?: boolean
+    // 通用属性
     class?: string
     disabled?: boolean
   }

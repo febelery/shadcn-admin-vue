@@ -20,6 +20,7 @@ declare module 'vue' {
     AutoFormFieldEditor: typeof import('./src/components/ui/auto-form/AutoFormFieldEditor.vue')['default']
     AutoFormFieldEnum: typeof import('./src/components/ui/auto-form/AutoFormFieldEnum.vue')['default']
     AutoFormFieldFile: typeof import('./src/components/ui/auto-form/AutoFormFieldFile.vue')['default']
+    AutoFormFieldFileUpload: typeof import('./src/components/ui/auto-form/AutoFormFieldFileUpload.vue')['default']
     AutoFormFieldInput: typeof import('./src/components/ui/auto-form/AutoFormFieldInput.vue')['default']
     AutoFormFieldNumber: typeof import('./src/components/ui/auto-form/AutoFormFieldNumber.vue')['default']
     AutoFormFieldObject: typeof import('./src/components/ui/auto-form/AutoFormFieldObject.vue')['default']

@@ -5,6 +5,7 @@ import AutoFormFieldDate from './AutoFormFieldDate.vue'
 import AutoFormFieldEditor from './AutoFormFieldEditor.vue'
 import AutoFormFieldEnum from './AutoFormFieldEnum.vue'
 import AutoFormFieldFile from './AutoFormFieldFile.vue'
+import AutoFormFieldFileUpload from './AutoFormFieldFileUpload.vue'
 import AutoFormFieldInput from './AutoFormFieldInput.vue'
 import AutoFormFieldNumber from './AutoFormFieldNumber.vue'
 import AutoFormFieldObject from './AutoFormFieldObject.vue'
@@ -19,6 +20,7 @@ export const INPUT_COMPONENTS: InputComponents = {
   number: AutoFormFieldNumber,
   string: AutoFormFieldInput,
   file: AutoFormFieldFile,
+  fileUpload: AutoFormFieldFileUpload,
   array: AutoFormFieldArray,
   object: AutoFormFieldObject,
   editor: AutoFormFieldEditor,

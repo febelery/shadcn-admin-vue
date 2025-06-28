@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { createArticleApi } from '@/api/articles'
 import type { CreateArticleParams } from '@/api/articles'
+import { FileType } from '@/components/file-upload/types'
 import * as z from 'zod'
 
 const router = useRouter()
@@ -19,6 +20,9 @@ const formSchema = z.object({
     .optional(),
   content: z.string()
     .min(10, '文章内容至少需要10个字符'),
+  cover: z.string()
+    .url('请上传有效的封面图片')
+    .optional(),
   category: z.enum(['tech', 'tools', 'tutorial', 'news'], {
     required_error: '请选择文章分类',
   }),
@@ -39,6 +43,7 @@ const handleSubmit = async (values: z.infer<typeof formSchema>) => {
       category: values.category,
       tags: values.tags,
       status: values.status,
+      cover: values.cover,
     }
 
     await createArticleApi(createData)
@@ -109,6 +114,18 @@ const goBack = () => {
                     class: 'min-h-[400px]',
                   },
                 },
+                cover: {
+                  label: '封面图片',
+                  description: '文章的封面图片，建议尺寸 16:9',
+                  component: 'fileUpload',
+                  inputProps: {
+                    maxFiles: 1,
+                    acceptedTypes: [FileType.IMAGE_ALL],
+                    maxSize: 5 * 1024 * 1024, // 5MB
+                    autoUpload: true,
+                    useQiniu: true,
+                  },
+                },
                 category: {
                   label: '分类',
                   description: '选择文章所属的分类',
@@ -152,6 +169,13 @@ const goBack = () => {
                   :shape="fields.excerpt.shape"
                 />
                 
+                <!-- 封面图片 -->
+                <AutoFormField
+                  :config="fields.cover.config"
+                  :field-name="fields.cover.fieldName"
+                  :shape="fields.cover.shape"
+                />
+                
                 <!-- 标签和状态 -->
                 <div class="grid gap-6 md:grid-cols-2">
                   <AutoFormField
@@ -190,23 +214,6 @@ const goBack = () => {
 
       <!-- 侧边栏 -->
       <div class="space-y-6">
-        <!-- 封面图片 -->
-        <Card>
-          <CardHeader>
-            <CardTitle>封面图片</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="space-y-4">
-              <div class="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
-                <div class="text-center">
-                  <p class="text-sm text-muted-foreground">点击上传封面图片</p>
-                  <p class="text-xs text-muted-foreground mt-1">支持 JPG、PNG 格式</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <!-- 写作提示 -->
         <Card>
           <CardHeader>
@@ -221,6 +228,10 @@ const goBack = () => {
               <li class="flex items-start gap-2">
                 <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
                 <span>摘要控制在150字以内，概括文章要点</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <span>封面图片建议使用 16:9 比例</span>
               </li>
               <li class="flex items-start gap-2">
                 <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
@@ -256,6 +267,33 @@ const goBack = () => {
               <div>
                 <div class="font-medium text-orange-600">资讯</div>
                 <div class="text-muted-foreground">行业动态、新闻资讯</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- 上传提示 -->
+        <Card>
+          <CardHeader>
+            <CardTitle>上传说明</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="space-y-3 text-sm text-muted-foreground">
+              <div class="flex items-start gap-2">
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <span>支持 JPG、PNG、GIF、WebP 格式</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <span>单个文件最大 5MB</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <span>建议图片尺寸 1200x675 像素</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <span>支持拖拽上传和粘贴上传</span>
               </div>
             </div>
           </CardContent>
