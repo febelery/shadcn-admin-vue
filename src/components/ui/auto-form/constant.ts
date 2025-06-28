@@ -2,6 +2,7 @@ import type { InputComponents } from './interface'
 import AutoFormFieldArray from './AutoFormFieldArray.vue'
 import AutoFormFieldBoolean from './AutoFormFieldBoolean.vue'
 import AutoFormFieldDate from './AutoFormFieldDate.vue'
+import AutoFormFieldEditor from './AutoFormFieldEditor.vue'
 import AutoFormFieldEnum from './AutoFormFieldEnum.vue'
 import AutoFormFieldFile from './AutoFormFieldFile.vue'
 import AutoFormFieldInput from './AutoFormFieldInput.vue'
@@ -20,6 +21,7 @@ export const INPUT_COMPONENTS: InputComponents = {
   file: AutoFormFieldFile,
   array: AutoFormFieldArray,
   object: AutoFormFieldObject,
+  editor: AutoFormFieldEditor,
 }
 
 /**

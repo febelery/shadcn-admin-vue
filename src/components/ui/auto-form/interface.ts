@@ -30,6 +30,7 @@ export interface InputComponents {
   file: Component
   array: Component
   object: Component
+  editor: Component
 }
 
 export interface ConfigItem {
@@ -41,7 +42,11 @@ export interface ConfigItem {
   component?: keyof typeof INPUT_COMPONENTS | Component
   /** Hide `FormLabel`. */
   hideLabel?: boolean
-  inputProps?: InputHTMLAttributes
+  inputProps?: InputHTMLAttributes & {
+    mode?: 'full' | 'lite' | 'pure'
+    class?: string
+    disabled?: boolean
+  }
 }
 
 // Define a type to unwrap an array
