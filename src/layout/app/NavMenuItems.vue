@@ -13,10 +13,10 @@ const props = defineProps<{
       <!-- 没有子项的菜单项 -->
       <SidebarMenuSubItem v-if="!item.items || item.items.length === 0">
         <SidebarMenuSubButton as-child :data-active="item.isActive">
-          <a :href="item.url">
+          <router-link :to="item.url">
             <component :is="item.icon" v-if="item.icon" />
             <span>{{ item.title }}</span>
-          </a>
+          </router-link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
 

@@ -1,25 +1,47 @@
 <script setup lang="ts">
 import { ChevronRight } from 'lucide-vue-next'
+import { computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useMenuStore } from '@/stores/menu'
+import { usePermissionStore } from '@/stores/permission'
 import NavMenuItems from './NavMenuItems.vue'
 import { type MenuItem, getMenuActiveState, hasActiveChild } from './useMenu'
 
-const props = defineProps<{
-  items: MenuItem[]
-}>()
+const menuStore = useMenuStore()
+const permissionStore = usePermissionStore()
+const route = useRoute()
+
+// 根据用户权限过滤菜单
+const filteredMenuItems = computed(() => {
+  return menuStore.filteredMenuItems(permissionStore.permissions)
+})
+
+// 监听路由变化，设置激活状态
+watch(
+  () => route.path,
+  (newPath) => {
+    menuStore.setActiveMenuItem(newPath)
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  // 初始化时设置当前路由的激活状态
+  menuStore.setActiveMenuItem(route.path)
+})
 </script>
 
 <template>
   <SidebarGroup>
-    <!-- <SidebarGroupLabel>Platform</SidebarGroupLabel> -->
     <SidebarMenu>
-      <template v-for="item in items" :key="item.title">
+      <template v-for="item in filteredMenuItems" :key="item.title">
         <!-- 没有子项的顶级菜单项 -->
         <SidebarMenuItem v-if="!item.items || item.items.length === 0">
           <SidebarMenuButton as-child :data-active="item.isActive">
-            <a :href="item.url">
+            <router-link :to="item.url">
               <component :is="item.icon" v-if="item.icon" />
               <span>{{ item.title }}</span>
-            </a>
+            </router-link>
           </SidebarMenuButton>
         </SidebarMenuItem>
 

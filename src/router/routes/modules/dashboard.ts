@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-const login: RouteRecordRaw = {
+const dashboard: RouteRecordRaw = {
   path: '/dashboard',
   component: () => import('@/layout/app/AppSidebar.vue'),
   children: [
@@ -8,8 +8,11 @@ const login: RouteRecordRaw = {
       path: '',
       name: 'dashboard',
       component: () => import('@/views/dashboard/index.vue'),
+      meta: {
+        title: 'Dashboard',
+      },
     },
   ],
 }
 
-export default login
+export default dashboard
