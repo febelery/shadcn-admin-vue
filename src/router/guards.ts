@@ -1,129 +1,122 @@
 import type { Router } from 'vue-router'
-import { menuRoutes } from '@/router/routes'
 import { useUserStore } from '@/stores/user'
 
-// 获取用户有权限访问的第一个路由
-function getFirstAccessibleRoute(permissions: string[]): string {
-  // 遍历菜单路由，找到第一个有权限访问的路由
-  for (const route of menuRoutes) {
-    if (route.meta?.permission) {
-      const routePermissions = Array.isArray(route.meta.permission) ? route.meta.permission : [route.meta.permission]
-
-      // 检查是否有权限访问这个路由
-      if (routePermissions.some((permission) => permissions.includes(permission))) {
-        // 如果有子路由，返回第一个子路由的路径
-        if (route.children && route.children.length > 0) {
-          const firstChild = route.children.find((child) => !child.meta?.hideInMenu)
-          if (firstChild) {
-            return firstChild.path === '' ? route.path : `${route.path}/${firstChild.path}`
-          }
-        }
-        return route.path
-      }
-    } else {
-      // 如果路由本身没有权限要求，检查子路由
-      if (route.children && route.children.length > 0) {
-        for (const child of route.children) {
-          if (child.meta?.permission) {
-            const childPermissions = Array.isArray(child.meta.permission)
-              ? child.meta.permission
-              : [child.meta.permission]
-
-            if (childPermissions.some((permission) => permissions.includes(permission))) {
-              return child.path === '' ? route.path : `${route.path}/${child.path}`
-            }
-          }
-        }
-      }
+/**
+ * 检查路由是否需要认证（支持父子路由继承）
+ * @param matched 路由匹配记录数组
+ * @returns 是否需要认证
+ */
+function requiresAuthentication(matched: any[]): boolean {
+  // 从父到子遍历路由，如果任何一级设置了 requiresAuth，则继承该设置
+  for (const route of matched) {
+    if (route.meta?.requiresAuth !== undefined) {
+      return route.meta.requiresAuth
     }
   }
-
-  // 如果没有找到有权限的路由，返回 403 页面
-  return '/403'
+  
+  // 如果没有明确设置，默认需要认证
+  return true
 }
 
-// 清理重定向URL，移除已存在的redirect参数
-function cleanRedirectUrl(url: string): string {
-  try {
-    const urlObj = new URL(url, window.location.origin)
-    urlObj.searchParams.delete('redirect')
-    return urlObj.pathname + urlObj.search
-  } catch {
-    // 如果URL解析失败，直接返回路径部分
-    return url.split('?')[0]
+/**
+ * 检查用户是否有访问路由的权限
+ * @param matched 路由匹配记录数组
+ * @param userPermissions 用户权限数组
+ * @returns 是否有权限
+ */
+function hasRoutePermission(matched: any[], userPermissions: string[]): boolean {
+  // 检查最具体的路由（最后一个匹配的路由）的权限
+  const targetRoute = matched[matched.length - 1]
+  
+  if (!targetRoute?.meta?.permission) {
+    return true // 没有权限要求的路由允许访问
   }
+  
+  const requiredPermissions = Array.isArray(targetRoute.meta.permission) 
+    ? targetRoute.meta.permission 
+    : [targetRoute.meta.permission]
+  
+  return requiredPermissions.some(permission => userPermissions.includes(permission))
+}
+
+/**
+ * 获取用户有权限访问的第一个路由
+ * @param userPermissions 用户权限数组
+ * @returns 路由路径
+ */
+function getFirstAccessibleRoute(userPermissions: string[]): string {
+  // 这里可以根据权限返回合适的首页路由
+  // 简单实现：如果有 dashboard.view 权限就去 dashboard，否则去第一个有权限的路由
+  if (userPermissions.includes('dashboard.view')) {
+    return '/dashboard'
+  }
+  
+  // 可以根据实际需求扩展更复杂的逻辑
+  return '/403'
 }
 
 export function setupRouterGuards(router: Router) {
   // 全局前置守卫
   router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
-
-    // 公开路由，不需要登录
-    const publicRoutes = ['/login', '/401', '/403', '/404', '/500']
-    const isPublicRoute = publicRoutes.includes(to.path)
-
-    // 如果是公开路由，直接放行
-    if (isPublicRoute) {
-      // 如果已登录用户访问登录页，重定向到首页
-      if (to.path === '/login' && userStore.isLoggedIn) {
-        const permissions = userStore.userInfo?.permissions || []
-        const firstRoute = getFirstAccessibleRoute(permissions)
-        next(firstRoute)
-        return
-      }
+    
+    // 检查路由是否需要认证
+    const needsAuth = requiresAuthentication(to.matched)
+    
+    // 如果路由不需要认证，直接放行
+    if (!needsAuth) {
       next()
       return
     }
-
-    // 检查是否已登录
+    
+    // 检查用户是否已登录
     if (!userStore.isLoggedIn) {
-      // 清理重定向URL，避免参数累加
-      const cleanUrl = cleanRedirectUrl(to.fullPath)
-      next(`/login?redirect=${encodeURIComponent(cleanUrl)}`)
+      // 未登录，重定向到登录页
+      const redirect = encodeURIComponent(to.fullPath)
+      next(`/login?redirect=${redirect}`)
       return
     }
-
-    // 尝试获取用户信息（如果本地没有）
+    
+    // 已登录，检查是否有用户信息
     if (!userStore.userInfo) {
       try {
         await userStore.getUserInfo()
       } catch (error) {
-        // 清理重定向URL
-        const cleanUrl = cleanRedirectUrl(to.fullPath)
-        next(`/login?redirect=${encodeURIComponent(cleanUrl)}`)
+        // 获取用户信息失败，可能是 token 过期
+        userStore.logout()
+        const redirect = encodeURIComponent(to.fullPath)
+        next(`/login?redirect=${redirect}`)
         return
       }
     }
-
-    // 根路径重定向到第一个有权限的路由
+    
+    // 检查权限
+    const userPermissions = userStore.userInfo?.permissions || []
+    const hasPermission = hasRoutePermission(to.matched, userPermissions)
+    
+    if (!hasPermission) {
+      // 没有权限，重定向到 403 页面
+      next('/403')
+      return
+    }
+    
+    // 如果访问根路径，重定向到用户有权限的第一个路由
     if (to.path === '/') {
-      const permissions = userStore.userInfo?.permissions || []
-      const firstRoute = getFirstAccessibleRoute(permissions)
+      const firstRoute = getFirstAccessibleRoute(userPermissions)
       next(firstRoute)
       return
     }
-
-    // 检查路由权限
-    if (to.meta?.permission) {
-      const routePermissions = Array.isArray(to.meta.permission) ? to.meta.permission : [to.meta.permission]
-
-      const hasPermission = userStore.hasAnyPermission(routePermissions)
-
-      if (!hasPermission) {
-        next('/403')
-        return
-      }
-    }
-
+    
+    // 所有检查通过，允许访问
     next()
   })
-
-  // 全局后置钩子
+  
+  // 全局后置守卫
   router.afterEach((to) => {
     // 设置页面标题
-    if (to.meta?.title) {
-      document.title = `${to.meta.title} - Shadcn Vue Admin`
+    const title = to.meta?.title
+    if (title) {
+      document.title = `${title} - Shadcn Vue Admin`
     } else {
       document.title = 'Shadcn Vue Admin'
     }

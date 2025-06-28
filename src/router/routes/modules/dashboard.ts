@@ -10,7 +10,6 @@ const dashboard: RouteRecordRaw = {
     permission: 'dashboard.view', // 添加权限要求
     order: 1,
     group: 'main',
-    isMenuRoot: true,
   },
   children: [
     {

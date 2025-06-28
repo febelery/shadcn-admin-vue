@@ -50,6 +50,6 @@ export interface RouteMeta {
   target?: string
   hideInMenu?: boolean
   hideBreadcrumb?: boolean
-  requiresAuth?: boolean
+  requiresAuth?: boolean // 是否需要认证，支持父子路由继承
   roles?: string[]
 }

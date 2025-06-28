@@ -4,14 +4,14 @@ import type { RouteRecordRaw } from 'vue-router'
 const users: RouteRecordRaw = {
   path: '/users',
   component: () => import('@/layout/app/AppSidebar.vue'),
-  redirect: '/users/list', // 直接重定向到默认子路由
+  redirect: '/users/list',
   meta: {
     title: '用户',
     icon: Users,
     permission: 'users',
     order: 2,
     group: 'management',
-    isMenuRoot: true, // 明确标记为菜单根节点
+    requiresAuth: true, 
   },
   children: [
     {

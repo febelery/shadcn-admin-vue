@@ -4,14 +4,14 @@ import type { RouteRecordRaw } from 'vue-router'
 const articles: RouteRecordRaw = {
   path: '/articles',
   component: () => import('@/layout/app/AppSidebar.vue'),
-  redirect: '/articles/list', // 直接重定向到默认子路由
+  redirect: '/articles/list',
   meta: {
     title: '文章',
     icon: FileText,
     permission: 'articles',
     order: 3,
     group: 'content',
-    isMenuRoot: true, // 明确标记为菜单根节点
+    requiresAuth: true, 
   },
   children: [
     {
@@ -61,7 +61,7 @@ const articles: RouteRecordRaw = {
     {
       path: 'archive',
       name: 'articles-archive',
-      redirect: '/articles/archive/time', // 为有子路由的项目添加重定向
+      redirect: '/articles/archive/time',
       meta: {
         title: '文章归档',
         icon: Archive,

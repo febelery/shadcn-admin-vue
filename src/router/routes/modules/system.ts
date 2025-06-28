@@ -4,14 +4,15 @@ import type { RouteRecordRaw } from 'vue-router'
 const system: RouteRecordRaw = {
   path: '/system',
   component: () => import('@/layout/app/AppSidebar.vue'),
-  redirect: '/system/settings', // 直接重定向到默认子路由
+  redirect: '/system/settings',
   meta: {
     title: '系统',
     icon: Settings,
     permission: 'system',
     order: 4,
     group: 'system',
-    isMenuRoot: true, // 明确标记为菜单根节点
+    isMenuRoot: true,
+    requiresAuth: true, // 父路由需要认证，所有子路由会继承
   },
   children: [
     {
@@ -23,6 +24,7 @@ const system: RouteRecordRaw = {
         icon: Settings,
         permission: 'system.settings',
         order: 1,
+        // 继承父路由的 requiresAuth: true
       },
     },
     {
@@ -34,6 +36,7 @@ const system: RouteRecordRaw = {
         icon: Database,
         permission: 'system.database',
         order: 2,
+        // 继承父路由的 requiresAuth: true
       },
     },
     {
@@ -45,6 +48,7 @@ const system: RouteRecordRaw = {
         icon: Shield,
         permission: 'system.security',
         order: 3,
+        // 继承父路由的 requiresAuth: true
       },
     },
     {
@@ -57,6 +61,7 @@ const system: RouteRecordRaw = {
         permission: 'system.notifications',
         order: 4,
         badge: 'NEW',
+        // 继承父路由的 requiresAuth: true
       },
     },
     {
@@ -68,6 +73,7 @@ const system: RouteRecordRaw = {
         icon: Activity,
         permission: 'system.logs',
         order: 5,
+        // 继承父路由的 requiresAuth: true
       },
     },
   ],
