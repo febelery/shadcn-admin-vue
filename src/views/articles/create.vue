@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { ArrowLeft, Save, Eye } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { createArticleApi } from '@/api/articles'
 import type { CreateArticleParams } from '@/api/articles'
-import { Editor } from '@/components/editor'
 import * as z from 'zod'
 
 const router = useRouter()
@@ -19,6 +17,8 @@ const formSchema = z.object({
     .min(10, '摘要至少需要10个字符')
     .max(300, '摘要不能超过300个字符')
     .optional(),
+  content: z.string()
+    .min(10, '文章内容至少需要10个字符'),
   category: z.enum(['tech', 'tools', 'tutorial', 'news'], {
     required_error: '请选择文章分类',
   }),
@@ -30,39 +30,26 @@ const formSchema = z.object({
   }),
 })
 
-const content = ref('')
-const isSubmitting = ref(false)
-
-const handleSubmit = async (values: z.infer<typeof formSchema>, status?: string) => {
-  // 验证内容
-  if (!content.value.trim()) {
-    toast.error('请输入文章内容')
-    return
-  }
-
-  const finalStatus = status || values.status
-  isSubmitting.value = true
-  
+const handleSubmit = async (values: z.infer<typeof formSchema>) => {
   try {
     const createData: CreateArticleParams = {
       title: values.title,
       excerpt: values.excerpt,
-      content: content.value,
+      content: values.content,
       category: values.category,
       tags: values.tags,
-      status: finalStatus as 'published' | 'draft',
+      status: values.status,
     }
 
     await createArticleApi(createData)
     
-    const action = finalStatus === 'published' ? '发布' : '保存'
+    const action = values.status === 'published' ? '发布' : '保存'
     toast.success(`文章${action}成功`)
     router.push('/articles')
   } catch (error: any) {
     const message = error?.response?.data?.message || '操作失败'
     toast.error(message)
-  } finally {
-    isSubmitting.value = false
+    throw error // 重新抛出错误，让 AutoForm 处理
   }
 }
 
@@ -87,10 +74,11 @@ const goBack = () => {
     <!-- 表单 -->
     <div class="grid gap-6 lg:grid-cols-4">
       <div class="lg:col-span-3 space-y-6">
-        <!-- 基本信息 -->
+        <!-- 文章表单 -->
         <Card>
           <CardHeader>
-            <CardTitle>基本信息</CardTitle>
+            <CardTitle>文章信息</CardTitle>
+            <CardDescription>填写文章的基本信息和内容</CardDescription>
           </CardHeader>
           <CardContent>
             <AutoForm
@@ -110,6 +98,15 @@ const goBack = () => {
                   inputProps: {
                     placeholder: '请输入文章摘要',
                     rows: 3,
+                  },
+                },
+                content: {
+                  label: '文章内容',
+                  description: '文章的详细内容，支持富文本编辑',
+                  component: 'editor',
+                  inputProps: {
+                    mode: 'full',
+                    class: 'min-h-[400px]',
                   },
                 },
                 category: {
@@ -133,36 +130,60 @@ const goBack = () => {
               @submit="handleSubmit"
               class="space-y-6"
             >
+              <template #customAutoForm="{ fields }">
+                <!-- 基本信息字段 -->
+                <div class="grid gap-6 md:grid-cols-2">
+                  <AutoFormField
+                    :config="fields.title.config"
+                    :field-name="fields.title.fieldName"
+                    :shape="fields.title.shape"
+                  />
+                  <AutoFormField
+                    :config="fields.category.config"
+                    :field-name="fields.category.fieldName"
+                    :shape="fields.category.shape"
+                  />
+                </div>
+                
+                <!-- 摘要字段 -->
+                <AutoFormField
+                  :config="fields.excerpt.config"
+                  :field-name="fields.excerpt.fieldName"
+                  :shape="fields.excerpt.shape"
+                />
+                
+                <!-- 标签和状态 -->
+                <div class="grid gap-6 md:grid-cols-2">
+                  <AutoFormField
+                    :config="fields.tags.config"
+                    :field-name="fields.tags.fieldName"
+                    :shape="fields.tags.shape"
+                  />
+                  <AutoFormField
+                    :config="fields.status.config"
+                    :field-name="fields.status.fieldName"
+                    :shape="fields.status.shape"
+                  />
+                </div>
+                
+                <!-- 内容编辑器 -->
+                <AutoFormField
+                  :config="fields.content.config"
+                  :field-name="fields.content.fieldName"
+                  :shape="fields.content.shape"
+                />
+              </template>
+
               <div class="flex gap-4 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  @click="(values) => handleSubmit(values, 'draft')" 
-                  :disabled="isSubmitting"
-                >
-                  <Save class="mr-2 h-4 w-4" />
-                  保存草稿
-                </Button>
-                <Button 
-                  type="submit" 
-                  @click="(values) => handleSubmit(values, 'published')" 
-                  :disabled="isSubmitting"
-                >
+                <Button type="submit" class="flex-1">
                   <Eye class="mr-2 h-4 w-4" />
                   发布文章
                 </Button>
+                <Button type="button" variant="outline" @click="goBack" class="flex-1">
+                  取消
+                </Button>
               </div>
             </AutoForm>
-          </CardContent>
-        </Card>
-
-        <!-- 文章内容 -->
-        <Card>
-          <CardHeader>
-            <CardTitle>文章内容</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Editor v-model="content" mode="full" />
           </CardContent>
         </Card>
       </div>
