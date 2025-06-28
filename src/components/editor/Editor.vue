@@ -5,12 +5,13 @@
 <script setup lang="ts">
 import { AiEditor } from 'aieditor'
 import 'aieditor/dist/style.css'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { HTMLAttributes } from 'vue'
 import { toast } from 'vue-sonner'
 import { uploadToQiniu, uploadUrl } from '@/components/file-upload/fileUploadService'
 import { createUploadFile } from '@/components/file-upload/fileUtils'
 import { cn } from '@/lib/utils'
+import { useTheme } from '@/composables/useTheme'
 
 const divRef = ref()
 let aiEditor: AiEditor | null = null
@@ -28,6 +29,12 @@ const props = withDefaults(defineProps<EditorProps>(), {
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+// 使用主题组合式函数
+const { isDark } = useTheme()
+
+// 计算当前主题
+const currentTheme = computed(() => isDark.value ? 'dark' : 'light')
 
 const toolbarFull = [
   'undo',
@@ -129,11 +136,15 @@ const modeClass = computed(() => {
   }
 })
 
-onMounted(() => {
+// 创建编辑器的函数
+const createEditor = () => {
+  if (!divRef.value) return
+
   aiEditor = new AiEditor({
     element: divRef.value as Element,
     placeholder: '',
     content: props.modelValue,
+    theme: currentTheme.value, // 设置主题
     toolbarKeys: getToolbar(props.mode),
     textSelectionBubbleMenu: {
       enable: false,
@@ -154,6 +165,38 @@ onMounted(() => {
       uploaderEvent: uploaderEvent,
     },
   })
+}
+
+// 监听主题变化，重新创建编辑器
+watch(currentTheme, (newTheme) => {
+  if (aiEditor) {
+    // 保存当前内容
+    const currentContent = aiEditor.getHtml()
+    
+    // 销毁旧编辑器
+    aiEditor.destroy()
+    aiEditor = null
+    
+    // 等待 DOM 更新后重新创建编辑器
+    setTimeout(() => {
+      createEditor()
+      // 恢复内容
+      if (aiEditor && currentContent !== props.modelValue) {
+        aiEditor.setContent(currentContent)
+      }
+    }, 100)
+  }
+}, { immediate: false })
+
+// 监听 modelValue 变化
+watch(() => props.modelValue, (newValue) => {
+  if (aiEditor && aiEditor.getHtml() !== newValue) {
+    aiEditor.setContent(newValue)
+  }
+})
+
+onMounted(() => {
+  createEditor()
 })
 
 const uploader = (file: File): Promise<Record<string, any>> => {
