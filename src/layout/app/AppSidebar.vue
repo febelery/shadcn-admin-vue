@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { CircleHelp, Command, Settings } from 'lucide-vue-next'
+import { onMounted } from 'vue'
 import type { SidebarProps } from '@/components/ui/sidebar'
+import LockScreen from '@/components/LockScreen.vue'
 import PageLayout from '@/layout/page/PageLayout.vue'
+import { useUserStore } from '@/stores/user'
 import NavMain from './NavMenu.vue'
 import NavSecondary from './NavSecondary.vue'
 import NavUser from './NavUser.vue'
@@ -12,12 +15,20 @@ const props = withDefaults(defineProps<SidebarProps>(), {
   variant: 'inset',
 })
 
+const userStore = useUserStore()
+
+// 组件挂载时尝试获取用户信息
+onMounted(async () => {
+  if (userStore.isLoggedIn && !userStore.userInfo) {
+    try {
+      await userStore.getUserInfo()
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+    }
+  }
+})
+
 const data = {
-  user: {
-    name: 'Ross',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
   navSecondary: [
     {
       title: 'Get Help',
@@ -60,7 +71,7 @@ const data = {
         <NavSecondary :items="data.navSecondary" class="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser :user="data.user" />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
@@ -68,5 +79,8 @@ const data = {
       <SiteHeader />
       <PageLayout />
     </SidebarInset>
+    
+    <!-- 锁屏组件 -->
+    <LockScreen />
   </SidebarProvider>
 </template>

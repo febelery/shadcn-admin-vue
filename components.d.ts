@@ -89,6 +89,7 @@ declare module 'vue' {
     FormMessage: typeof import('./src/components/ui/form/FormMessage.vue')['default']
     Input: typeof import('./src/components/ui/input/Input.vue')['default']
     Label: typeof import('./src/components/ui/label/Label.vue')['default']
+    LockScreen: typeof import('./src/components/LockScreen.vue')['default']
     Motion: typeof import('motion-v')['Motion']
     NavMenuItem: typeof import('./src/components/nav/NavMenuItem.vue')['default']
     NavProjects: typeof import('./src/components/NavProjects.vue')['default']
