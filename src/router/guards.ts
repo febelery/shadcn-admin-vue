@@ -1,5 +1,6 @@
 import type { Router } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useMenuStore } from '@/stores/menu'
 
 /**
  * 检查路由是否需要认证（支持父子路由继承）
@@ -45,13 +46,44 @@ function hasRoutePermission(matched: any[], userPermissions: string[]): boolean 
  * @returns 路由路径
  */
 function getFirstAccessibleRoute(userPermissions: string[]): string {
-  // 这里可以根据权限返回合适的首页路由
-  // 简单实现：如果有 dashboard.view 权限就去 dashboard，否则去第一个有权限的路由
+  const menuStore = useMenuStore()
+  
+  // 初始化菜单
+  menuStore.initializeMenu()
+  
+  // 根据权限过滤菜单
+  const filteredMenuItems = menuStore.filteredMenuItems(userPermissions)
+  
+  // 递归查找第一个可访问的路由
+  function findFirstRoute(items: any[]): string | null {
+    for (const item of items) {
+      // 如果有子菜单，递归查找
+      if (item.items && item.items.length > 0) {
+        const childRoute = findFirstRoute(item.items)
+        if (childRoute) return childRoute
+      } else {
+        // 如果是叶子节点且有URL，返回该路由
+        if (item.url && item.url !== '#') {
+          return item.url
+        }
+      }
+    }
+    return null
+  }
+  
+  const firstRoute = findFirstRoute(filteredMenuItems)
+  
+  // 如果找到了路由，返回；否则返回默认路由
+  if (firstRoute) {
+    return firstRoute
+  }
+  
+  // 如果没有找到任何可访问的路由，检查是否有仪表板权限
   if (userPermissions.includes('dashboard.view')) {
     return '/dashboard'
   }
   
-  // 可以根据实际需求扩展更复杂的逻辑
+  // 最后的兜底方案
   return '/403'
 }
 

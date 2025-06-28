@@ -47,51 +47,58 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useUserStore } from '@/stores/user'
-import { menuRoutes } from '@/router/routes'
+import { useMenuStore } from '@/stores/menu'
+import { usePermissionStore } from '@/stores/permission'
 import LoginForm from './components/login-form.vue'
 import OtpScan from './components/otp-scan.vue'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
+const menuStore = useMenuStore()
+const permissionStore = usePermissionStore()
 
 const isSubmitting = ref(false)
 const otpKey = ref('')
 
 // 获取用户有权限访问的第一个路由
 function getFirstAccessibleRoute(permissions: string[]): string {
-  for (const menuRoute of menuRoutes) {
-    if (menuRoute.meta?.permission) {
-      const routePermissions = Array.isArray(menuRoute.meta.permission) 
-        ? menuRoute.meta.permission 
-        : [menuRoute.meta.permission]
-      
-      if (routePermissions.some(permission => permissions.includes(permission))) {
-        if (menuRoute.children && menuRoute.children.length > 0) {
-          const firstChild = menuRoute.children.find(child => !child.meta?.hideInMenu)
-          if (firstChild) {
-            return firstChild.path === '' ? menuRoute.path : `${menuRoute.path}/${firstChild.path}`
-          }
-        }
-        return menuRoute.path
-      }
-    } else {
-      if (menuRoute.children && menuRoute.children.length > 0) {
-        for (const child of menuRoute.children) {
-          if (child.meta?.permission) {
-            const childPermissions = Array.isArray(child.meta.permission) 
-              ? child.meta.permission 
-              : [child.meta.permission]
-            
-            if (childPermissions.some(permission => permissions.includes(permission))) {
-              return child.path === '' ? menuRoute.path : `${menuRoute.path}/${child.path}`
-            }
-          }
+  // 初始化菜单
+  menuStore.initializeMenu()
+  
+  // 根据权限过滤菜单
+  const filteredMenuItems = menuStore.filteredMenuItems(permissions)
+  
+  // 递归查找第一个可访问的路由
+  function findFirstRoute(items: any[]): string | null {
+    for (const item of items) {
+      // 如果有子菜单，递归查找
+      if (item.items && item.items.length > 0) {
+        const childRoute = findFirstRoute(item.items)
+        if (childRoute) return childRoute
+      } else {
+        // 如果是叶子节点且有URL，返回该路由
+        if (item.url && item.url !== '#') {
+          return item.url
         }
       }
     }
+    return null
   }
   
+  const firstRoute = findFirstRoute(filteredMenuItems)
+  
+  // 如果找到了路由，返回；否则返回默认路由
+  if (firstRoute) {
+    return firstRoute
+  }
+  
+  // 如果没有找到任何可访问的路由，检查是否有仪表板权限
+  if (permissions.includes('dashboard.view')) {
+    return '/dashboard'
+  }
+  
+  // 最后的兜底方案
   return '/403'
 }
 
