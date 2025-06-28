@@ -17,6 +17,7 @@ declare module 'vue' {
     AutoFormFieldArray: typeof import('./src/components/ui/auto-form/AutoFormFieldArray.vue')['default']
     AutoFormFieldBoolean: typeof import('./src/components/ui/auto-form/AutoFormFieldBoolean.vue')['default']
     AutoFormFieldDate: typeof import('./src/components/ui/auto-form/AutoFormFieldDate.vue')['default']
+    AutoFormFieldEditor: typeof import('./src/components/ui/auto-form/AutoFormFieldEditor.vue')['default']
     AutoFormFieldEnum: typeof import('./src/components/ui/auto-form/AutoFormFieldEnum.vue')['default']
     AutoFormFieldFile: typeof import('./src/components/ui/auto-form/AutoFormFieldFile.vue')['default']
     AutoFormFieldInput: typeof import('./src/components/ui/auto-form/AutoFormFieldInput.vue')['default']
