@@ -3,8 +3,8 @@
     class="relative block w-full cursor-pointer overflow-hidden rounded-xl transition-all duration-300"
     :class="{
       'cursor-not-allowed': isUploadDisabled,
-      'p-6 sm:p-8': !currentFiles,
-      'p-4 sm:p-5': currentFiles > 0,
+      'p-4 sm:p-6 md:p-8': !currentFiles,
+      'p-3 sm:p-4 md:p-5': currentFiles > 0,
     }"
     @click="emitClick"
     @dragover.prevent="handleEnter"
@@ -31,7 +31,7 @@
             <div
               :class="
                 cn(
-                  'flex h-10 w-10 flex-shrink-0 rounded-[2px]',
+                  'flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 rounded-[2px]',
                   ((row - 1) * COLUMNS + (col - 1)) % 2 === 0
                     ? 'bg-gray-50 dark:bg-neutral-950'
                     : 'bg-gray-50 shadow-[0px_0px_1px_3px_rgba(255,255,255,1)_inset] dark:bg-neutral-950 dark:shadow-[0px_0px_1px_3px_rgba(0,0,0,1)_inset]'
@@ -55,26 +55,32 @@
         :transition="{ type: 'spring', stiffness: 300, damping: 25 }"
       >
         <div layout class="transition-all duration-300">
-          <div class="flex items-center" :class="{ 'flex-col': !currentFiles, 'flex-row': currentFiles > 0 }">
+          <div class="flex items-center" :class="{ 
+            'flex-col': !currentFiles, 
+            'flex-col sm:flex-row': currentFiles > 0 
+          }">
             <!-- 上传图标 -->
             <Motion
               layout
               :animate="isActive && !isUploadDisabled ? { scale: 1.05 } : {}"
               :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
-              :class="{ 'mb-3': !currentFiles, 'mr-3': currentFiles > 0 }"
+              :class="{ 
+                'mb-3': !currentFiles, 
+                'mb-2 sm:mb-0 sm:mr-3': currentFiles > 0 
+              }"
             >
               <div
                 class="flex items-center justify-center rounded-full"
                 :class="{
-                  'mb-2 size-14 bg-neutral-100 dark:bg-neutral-800': !currentFiles,
-                  'size-10 bg-neutral-100 dark:bg-neutral-800': currentFiles > 0,
+                  'mb-2 size-12 sm:size-14 bg-neutral-100 dark:bg-neutral-800': !currentFiles,
+                  'size-8 sm:size-10 bg-neutral-100 dark:bg-neutral-800': currentFiles > 0,
                   'bg-amber-100 dark:bg-amber-900/20': isUploadDisabled,
                 }"
               >
                 <Upload
                   :class="{
-                    'size-6': !currentFiles,
-                    'size-4': currentFiles > 0,
+                    'size-5 sm:size-6': !currentFiles,
+                    'size-3 sm:size-4': currentFiles > 0,
                     'text-neutral-500 dark:text-neutral-400': true,
                     'text-amber-600 dark:text-amber-400': isUploadDisabled,
                     'text-neutral-700 dark:text-neutral-300': isActive && !isUploadDisabled,
@@ -84,18 +90,30 @@
             </Motion>
 
             <!-- 上传状态提示和文件信息 -->
-            <div class="flex-1" :class="{ 'text-center': !currentFiles, 'text-left': currentFiles > 0 }">
+            <div class="flex-1" :class="{ 
+              'text-center': !currentFiles, 
+              'text-center sm:text-left': currentFiles > 0 
+            }">
               <Motion layout :transition="{ type: 'spring', stiffness: 300, damping: 20 }">
-                <p class="font-medium text-neutral-700 dark:text-neutral-200" :class="{ 'text-sm': currentFiles > 0 }">
+                <p class="font-medium text-neutral-700 dark:text-neutral-200" :class="{ 
+                  'text-base sm:text-lg': !currentFiles,
+                  'text-sm': currentFiles > 0 
+                }">
                   <span v-if="isUploadDisabled" class="text-amber-600 dark:text-amber-400">已达到最大上传数量</span>
                   <span v-else-if="currentFiles > 0">继续添加文件</span>
                   <span v-else>上传文件</span>
                 </p>
                 <p
                   class="text-neutral-500 dark:text-neutral-400"
-                  :class="{ 'mt-1 text-sm': !currentFiles, 'text-xs': currentFiles > 0 }"
+                  :class="{ 
+                    'mt-1 text-sm': !currentFiles, 
+                    'text-xs mt-1': currentFiles > 0 
+                  }"
                 >
-                  <span v-if="!isUploadDisabled">将文件拖放到此处、单击上传或粘贴(Ctrl+V)</span>
+                  <span v-if="!isUploadDisabled">
+                    <span class="hidden sm:inline">将文件拖放到此处、单击上传或粘贴(Ctrl+V)</span>
+                    <span class="sm:hidden">点击上传或粘贴文件</span>
+                  </span>
                 </p>
               </Motion>
 
@@ -107,14 +125,17 @@
                 :animate="{ opacity: 1, y: 0 }"
                 :exit="{ opacity: 0 }"
                 class="text-sm font-medium text-green-600 dark:text-green-400"
-                :class="{ 'mb-2 text-center': !currentFiles, 'mt-1': currentFiles > 0 }"
+                :class="{ 
+                  'mb-2 text-center': !currentFiles, 
+                  'mt-1 text-center sm:text-left': currentFiles > 0 
+                }"
               >
                 粘贴成功！
               </Motion>
             </div>
 
-            <!-- 当有文件时，文件信息显示在右侧 -->
-            <div v-if="currentFiles > 0" class="ml-auto">
+            <!-- 当有文件时，文件信息显示在右侧（桌面端）或底部（移动端） -->
+            <div v-if="currentFiles > 0" class="mt-2 sm:mt-0 sm:ml-auto">
               <FileUploadInfo
                 :max-files="maxFiles"
                 :current-files="currentFiles"
@@ -134,15 +155,13 @@
             />
           </div>
         </div>
-
-        <!-- 拖放状态指示 - 只在拖拽状态显示微妙的覆盖层 -->
       </Motion>
 
       <!-- 文件预览区域 -->
       <div v-if="currentFiles > 0" class="mt-3 w-full">
         <slot />
       </div>
-      <div v-else class="mt-6 w-full">
+      <div v-else class="mt-4 sm:mt-6 w-full">
         <slot />
       </div>
     </div>
@@ -158,9 +177,17 @@ import { cn } from '@/lib/utils'
 import FileUploadInfo from './FileUploadInfo.vue'
 import type { AcceptedFileType } from './types'
 
-// 网格背景配置
+// 网格背景配置 - 响应式调整
 const ROWS = 11
-const COLUMNS = 21
+const COLUMNS = computed(() => {
+  // 根据屏幕尺寸调整列数
+  if (typeof window !== 'undefined') {
+    if (window.innerWidth < 640) return 15 // 小屏幕减少列数
+    if (window.innerWidth < 1024) return 18 // 中等屏幕
+    return 21 // 大屏幕
+  }
+  return 21
+})
 
 interface FileUploadZoneProps {
   class?: HTMLAttributes['class']

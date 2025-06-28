@@ -1,5 +1,5 @@
 <template>
-  <div :class="cn('w-2xl rounded-lg border border-dashed border-neutral-200 dark:border-neutral-800', $props.class)">
+  <div :class="cn('w-full rounded-lg border border-dashed border-neutral-200 dark:border-neutral-800', $props.class)">
     <!-- 文件上传区域 -->
     <FileUploadZone
       :max-files="props.maxFiles"
@@ -13,13 +13,13 @@
       <!-- 文件预览区域 - 只有当有文件时才显示 -->
       <div v-if="files.length > 0" class="relative w-full">
         <!-- 单文件模式预览 -->
-        <div v-if="props.maxFiles === 1">
+        <div v-if="props.maxFiles === 1" class="w-full">
           <Motion
             :key="`file-${0}`"
             :initial="{ opacity: 0, scale: 0.8 }"
             :animate="{ opacity: 1, scale: 1 }"
             :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
-            class="mx-auto max-w-md"
+            class="mx-auto w-full max-w-sm"
           >
             <FileThumbnail
               :file="files[0]"
@@ -32,8 +32,8 @@
           </Motion>
         </div>
 
-        <!-- 多文件模式网格布局 -->
-        <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <!-- 多文件模式网格布局 - 响应式网格 -->
+        <div v-else class="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           <Motion
             v-for="(file, idx) in files"
             :key="`file-${idx}`"
