@@ -35,7 +35,7 @@
         <LoginForm :is-submitting="isSubmitting" @submit="handleLogin" />
       </template>
       <template v-else>
-        <OtpScan :otp-key="otpKey" @back="otpKey = ''" @success="loginSuccesse" />
+        <OtpScan :otp-key="otpKey" @back="otpKey = ''" @success="loginSuccess" />
       </template>
     </Motion>
   </div>
@@ -44,15 +44,56 @@
 <script setup lang="ts">
 import confetti from 'canvas-confetti'
 import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useUserStore } from '@/stores/user'
+import { menuRoutes } from '@/router/routes'
 import LoginForm from './components/login-form.vue'
 import OtpScan from './components/otp-scan.vue'
 
+const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
+
 const isSubmitting = ref(false)
 const otpKey = ref('')
-const currentCredentials = ref<Record<string, any> | null>(null)
+
+// 获取用户有权限访问的第一个路由
+function getFirstAccessibleRoute(permissions: string[]): string {
+  for (const menuRoute of menuRoutes) {
+    if (menuRoute.meta?.permission) {
+      const routePermissions = Array.isArray(menuRoute.meta.permission) 
+        ? menuRoute.meta.permission 
+        : [menuRoute.meta.permission]
+      
+      if (routePermissions.some(permission => permissions.includes(permission))) {
+        if (menuRoute.children && menuRoute.children.length > 0) {
+          const firstChild = menuRoute.children.find(child => !child.meta?.hideInMenu)
+          if (firstChild) {
+            return firstChild.path === '' ? menuRoute.path : `${menuRoute.path}/${firstChild.path}`
+          }
+        }
+        return menuRoute.path
+      }
+    } else {
+      if (menuRoute.children && menuRoute.children.length > 0) {
+        for (const child of menuRoute.children) {
+          if (child.meta?.permission) {
+            const childPermissions = Array.isArray(child.meta.permission) 
+              ? child.meta.permission 
+              : [child.meta.permission]
+            
+            if (childPermissions.some(permission => permissions.includes(permission))) {
+              return child.path === '' ? menuRoute.path : `${menuRoute.path}/${child.path}`
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return '/403'
+}
 
 const handleLogin = async (values: Record<string, any>) => {
   isSubmitting.value = true
@@ -61,13 +102,12 @@ const handleLogin = async (values: Record<string, any>) => {
     const res = await userStore.login(values)
 
     if (res.needOtp) {
-      currentCredentials.value = values
       otpKey.value = res.otpKey
     } else {
-      loginSuccesse()
+      loginSuccess()
     }
   } catch (err: any) {
-    toast.error(err?.data?.message || '登录失败', {
+    toast.error(err?.response?.data?.message || '登录失败', {
       position: 'top-center',
     })
   } finally {
@@ -75,9 +115,19 @@ const handleLogin = async (values: Record<string, any>) => {
   }
 }
 
-const loginSuccesse = () => {
+const loginSuccess = () => {
   toast.success('登录成功')
   celebrate()
+  
+  // 获取重定向地址或默认跳转到第一个有权限的路由
+  const redirect = route.query.redirect as string
+  if (redirect) {
+    router.push(redirect)
+  } else {
+    const permissions = userStore.userInfo?.permissions || []
+    const firstRoute = getFirstAccessibleRoute(permissions)
+    router.push(firstRoute)
+  }
 }
 
 const celebrate = () => {

@@ -7,9 +7,10 @@ const dashboard: RouteRecordRaw = {
   meta: {
     title: '仪表板',
     icon: LayoutDashboard,
+    permission: 'dashboard.view', // 添加权限要求
     order: 1,
     group: 'main',
-    isMenuRoot: true, // 明确标记为菜单根节点
+    isMenuRoot: true,
   },
   children: [
     {
@@ -18,7 +19,7 @@ const dashboard: RouteRecordRaw = {
       component: () => import('@/views/dashboard/index.vue'),
       meta: {
         title: '仪表板',
-        hideInMenu: true, // 隐藏子路由，只显示父级
+        hideInMenu: true,
       },
     },
   ],

@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { ArrowLeft, Save, Eye } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { createArticleApi } from '@/api/articles'
+import type { CreateArticleParams } from '@/api/articles'
 import { Editor } from '@/components/editor'
 import * as z from 'zod'
 
@@ -42,21 +44,30 @@ const handleSubmit = async (values: z.infer<typeof formSchema>, status?: string)
   isSubmitting.value = true
   
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const createData: CreateArticleParams = {
+      title: values.title,
+      excerpt: values.excerpt,
+      content: content.value,
+      category: values.category,
+      tags: values.tags,
+      status: finalStatus as 'published' | 'draft',
+    }
+
+    await createArticleApi(createData)
     
     const action = finalStatus === 'published' ? '发布' : '保存'
     toast.success(`文章${action}成功`)
-    router.push('/articles') // 会自动重定向到 /articles/list
-  } catch (error) {
-    toast.error('操作失败')
+    router.push('/articles')
+  } catch (error: any) {
+    const message = error?.response?.data?.message || '操作失败'
+    toast.error(message)
   } finally {
     isSubmitting.value = false
   }
 }
 
 const goBack = () => {
-  router.push('/articles') // 会自动重定向到 /articles/list
+  router.push('/articles')
 }
 </script>
 

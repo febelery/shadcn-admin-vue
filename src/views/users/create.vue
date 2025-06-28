@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { ArrowLeft, Save } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { createUserApi } from '@/api/users'
+import type { CreateUserParams } from '@/api/users'
 import * as z from 'zod'
 
 const router = useRouter()
@@ -32,20 +34,27 @@ const handleSubmit = async (values: z.infer<typeof formSchema>) => {
   isSubmitting.value = true
   
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    const createData: CreateUserParams = {
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      role: values.role,
+      status: values.status,
+    }
+
+    await createUserApi(createData)
     toast.success('用户创建成功')
-    router.push('/users') // 会自动重定向到 /users/list
-  } catch (error) {
-    toast.error('创建用户失败')
+    router.push('/users')
+  } catch (error: any) {
+    const message = error?.response?.data?.message || '创建用户失败'
+    toast.error(message)
   } finally {
     isSubmitting.value = false
   }
 }
 
 const goBack = () => {
-  router.push('/users') // 会自动重定向到 /users/list
+  router.push('/users')
 }
 </script>
 

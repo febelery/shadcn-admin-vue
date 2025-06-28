@@ -1,13 +1,18 @@
 import { defineStore } from 'pinia'
-import { loginApi, verifyOtpApi } from '@/api/user'
+import { loginApi, verifyOtpApi, getCurrentUserApi } from '@/api/users'
+import type { User } from '@/api/users'
 import { getFingerprint } from '@/lib/utils'
 
 const USER_STORAGE_KEY = 'mkt-user'
 
 interface UserInfo {
+  id: number
   name: string
-  nickname?: string
+  email: string
+  role: string
+  status: string
   avatar?: string
+  permissions: string[]
 }
 
 interface StoredUser {
@@ -43,6 +48,31 @@ export const useUserStore = defineStore('user', {
   getters: {
     isLoggedIn: (state): boolean => {
       return !!state.token && !!state.expiresAt && Date.now() / 1000 < state.expiresAt
+    },
+
+    hasPermission: (state) => {
+      return (permission: string | string[]) => {
+        if (!state.userInfo?.permissions) return false
+        
+        if (Array.isArray(permission)) {
+          return permission.some(p => state.userInfo!.permissions.includes(p))
+        }
+        return state.userInfo.permissions.includes(permission)
+      }
+    },
+
+    hasAnyPermission: (state) => {
+      return (permissions: string[]) => {
+        if (!state.userInfo?.permissions) return false
+        return permissions.some(permission => state.userInfo!.permissions.includes(permission))
+      }
+    },
+
+    hasAllPermissions: (state) => {
+      return (permissions: string[]) => {
+        if (!state.userInfo?.permissions) return false
+        return permissions.every(permission => state.userInfo!.permissions.includes(permission))
+      }
     },
   },
 
@@ -83,11 +113,23 @@ export const useUserStore = defineStore('user', {
         return null
       }
 
-      if (Math.random() < 0.1) {
-        // 留作扩展：远程拉取用户信息
+      try {
+        const res = await getCurrentUserApi()
+        this.userInfo = {
+          id: res.data.id,
+          name: res.data.name,
+          email: res.data.email,
+          role: res.data.role,
+          status: res.data.status,
+          avatar: res.data.avatar,
+          permissions: res.data.permissions,
+        }
+        this.saveToStorage()
+        return this.userInfo
+      } catch (error) {
+        this.reset()
+        return null
       }
-
-      return this.userInfo
     },
 
     getToken(): string | null {
@@ -113,9 +155,13 @@ export const useUserStore = defineStore('user', {
       this.token = data.token
       this.expiresAt = data.expire_at
       this.userInfo = {
-        name: data.name,
-        nickname: data.nickname,
-        avatar: data.avatar,
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        status: data.user.status,
+        avatar: data.user.avatar,
+        permissions: data.user.permissions,
       }
       this.saveToStorage()
     },

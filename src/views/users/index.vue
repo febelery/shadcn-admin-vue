@@ -1,61 +1,120 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+import { getUsersApi, deleteUserApi } from '@/api/users'
+import type { User, UserListParams } from '@/api/users'
 
 const router = useRouter()
 
-// 模拟用户数据
-const users = ref([
-  {
-    id: 1,
-    name: '张三',
-    email: 'zhangsan@example.com',
-    role: '管理员',
-    status: '活跃',
-    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
-    createdAt: '2024-01-15',
-  },
-  {
-    id: 2,
-    name: '李四',
-    email: 'lisi@example.com',
-    role: '编辑',
-    status: '活跃',
-    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
-    createdAt: '2024-01-20',
-  },
-  {
-    id: 3,
-    name: '王五',
-    email: 'wangwu@example.com',
-    role: '用户',
-    status: '禁用',
-    avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
-    createdAt: '2024-02-01',
-  },
-])
-
+// 响应式数据
+const users = ref<User[]>([])
+const loading = ref(false)
 const searchQuery = ref('')
+const selectedRole = ref('all')
+const selectedStatus = ref('all')
+const pagination = ref({
+  page: 1,
+  pageSize: 10,
+  total: 0,
+})
+
+// 获取用户列表
+const fetchUsers = async () => {
+  loading.value = true
+  try {
+    const params: UserListParams = {
+      page: pagination.value.page,
+      pageSize: pagination.value.pageSize,
+      search: searchQuery.value || undefined,
+      role: selectedRole.value !== 'all' ? selectedRole.value : undefined,
+      status: selectedStatus.value !== 'all' ? selectedStatus.value : undefined,
+    }
+
+    const response = await getUsersApi(params)
+    users.value = response.data.data
+    pagination.value.total = response.data.total
+  } catch (error: any) {
+    toast.error('获取用户列表失败')
+    console.error('获取用户列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 删除用户
+const deleteUser = async (id: number, name: string) => {
+  if (!confirm(`确定要删除用户 "${name}" 吗？此操作不可恢复。`)) {
+    return
+  }
+
+  try {
+    await deleteUserApi(id)
+    toast.success('用户删除成功')
+    await fetchUsers()
+  } catch (error: any) {
+    toast.error('删除用户失败')
+    console.error('删除用户失败:', error)
+  }
+}
+
+// 搜索处理
+const handleSearch = () => {
+  pagination.value.page = 1
+  fetchUsers()
+}
+
+// 筛选处理
+const handleFilter = () => {
+  pagination.value.page = 1
+  fetchUsers()
+}
+
+// 页面加载时获取数据
+onMounted(() => {
+  fetchUsers()
+})
 
 const getStatusBadgeVariant = (status: string) => {
-  return status === '活跃' ? 'default' : 'secondary'
+  return status === 'active' ? 'default' : 'secondary'
 }
 
 const getRoleBadgeVariant = (role: string) => {
   switch (role) {
-    case '管理员':
+    case 'admin':
       return 'destructive'
-    case '编辑':
+    case 'editor':
       return 'default'
     default:
       return 'outline'
   }
 }
 
+const getRoleText = (role: string) => {
+  switch (role) {
+    case 'admin':
+      return '管理员'
+    case 'editor':
+      return '编辑'
+    case 'user':
+      return '用户'
+    default:
+      return role
+  }
+}
+
+const getStatusText = (status: string) => {
+  return status === 'active' ? '活跃' : '禁用'
+}
+
 // 使用编程式导航
 const navigateToCreate = () => {
   router.push('/users/create')
+}
+
+const navigateToEdit = (id: number) => {
+  router.push(`/users/edit/${id}`)
 }
 </script>
 
@@ -83,9 +142,10 @@ const navigateToCreate = () => {
               v-model="searchQuery"
               placeholder="搜索用户..."
               class="pl-9"
+              @keyup.enter="handleSearch"
             />
           </div>
-          <Select>
+          <Select v-model="selectedRole" @update:model-value="handleFilter">
             <SelectTrigger class="w-32">
               <SelectValue placeholder="角色" />
             </SelectTrigger>
@@ -96,7 +156,7 @@ const navigateToCreate = () => {
               <SelectItem value="user">用户</SelectItem>
             </SelectContent>
           </Select>
-          <Select>
+          <Select v-model="selectedStatus" @update:model-value="handleFilter">
             <SelectTrigger class="w-32">
               <SelectValue placeholder="状态" />
             </SelectTrigger>
@@ -106,6 +166,7 @@ const navigateToCreate = () => {
               <SelectItem value="inactive">禁用</SelectItem>
             </SelectContent>
           </Select>
+          <Button @click="handleSearch">搜索</Button>
         </div>
       </CardHeader>
     </Card>
@@ -114,10 +175,17 @@ const navigateToCreate = () => {
     <Card>
       <CardHeader>
         <CardTitle>用户列表</CardTitle>
-        <CardDescription>共 {{ users.length }} 个用户</CardDescription>
+        <CardDescription>共 {{ pagination.total }} 个用户</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
+        <div v-if="loading" class="flex items-center justify-center py-8">
+          <div class="text-center">
+            <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <p class="text-muted-foreground text-sm">正在加载...</p>
+          </div>
+        </div>
+        
+        <Table v-else>
           <TableHeader>
             <TableRow>
               <TableHead>用户</TableHead>
@@ -125,6 +193,7 @@ const navigateToCreate = () => {
               <TableHead>角色</TableHead>
               <TableHead>状态</TableHead>
               <TableHead>创建时间</TableHead>
+              <TableHead>最后登录</TableHead>
               <TableHead class="w-[100px]">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -144,15 +213,18 @@ const navigateToCreate = () => {
               <TableCell>{{ user.email }}</TableCell>
               <TableCell>
                 <Badge :variant="getRoleBadgeVariant(user.role)">
-                  {{ user.role }}
+                  {{ getRoleText(user.role) }}
                 </Badge>
               </TableCell>
               <TableCell>
                 <Badge :variant="getStatusBadgeVariant(user.status)">
-                  {{ user.status }}
+                  {{ getStatusText(user.status) }}
                 </Badge>
               </TableCell>
-              <TableCell>{{ user.createdAt }}</TableCell>
+              <TableCell>{{ new Date(user.createdAt).toLocaleDateString() }}</TableCell>
+              <TableCell>
+                {{ user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '从未登录' }}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
@@ -161,16 +233,15 @@ const navigateToCreate = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Eye class="mr-2 h-4 w-4" />
-                      查看
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem @click="navigateToEdit(user.id)">
                       <Edit class="mr-2 h-4 w-4" />
                       编辑
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
+                    <DropdownMenuItem 
+                      variant="destructive" 
+                      @click="deleteUser(user.id, user.name)"
+                    >
                       <Trash2 class="mr-2 h-4 w-4" />
                       删除
                     </DropdownMenuItem>
@@ -180,6 +251,33 @@ const navigateToCreate = () => {
             </TableRow>
           </TableBody>
         </Table>
+
+        <!-- 分页 -->
+        <div v-if="pagination.total > pagination.pageSize" class="mt-4 flex items-center justify-between">
+          <div class="text-sm text-muted-foreground">
+            显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} - 
+            {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }} 
+            共 {{ pagination.total }} 条
+          </div>
+          <div class="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              :disabled="pagination.page <= 1"
+              @click="pagination.page--; fetchUsers()"
+            >
+              上一页
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              :disabled="pagination.page >= Math.ceil(pagination.total / pagination.pageSize)"
+              @click="pagination.page++; fetchUsers()"
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   </div>
