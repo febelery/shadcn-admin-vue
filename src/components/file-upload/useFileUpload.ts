@@ -48,16 +48,35 @@ export function useFileUpload(options: {
   watch(
     () => modelValue,
     async (newValue) => {
-      if (newValue !== undefined && (!Array.isArray(newValue) || newValue.length > 0)) {
+      // 只有当 modelValue 有值且不为空时才加载
+      if (newValue && 
+          ((typeof newValue === 'string' && newValue.trim() !== '') || 
+           (Array.isArray(newValue) && newValue.length > 0 && newValue.some(url => url.trim() !== '')))) {
         await loadUrlsFromModel(newValue)
+      } else {
+        // 如果 modelValue 为空，清空文件列表
+        clearFiles()
       }
     },
     { immediate: true }
   )
 
   async function loadUrlsFromModel(urls: string | string[]) {
-    const urlList = Array.isArray(urls) ? urls : [urls]
+    // 处理空值情况
+    if (!urls) {
+      clearFiles()
+      return
+    }
 
+    const urlList = Array.isArray(urls) ? urls.filter(url => url && url.trim() !== '') : [urls].filter(url => url && url.trim() !== '')
+    
+    // 如果过滤后没有有效的 URL，清空文件列表
+    if (urlList.length === 0) {
+      clearFiles()
+      return
+    }
+
+    // 检查是否与当前已上传的 URL 相同，避免重复加载
     if (urlList.length === uploadedUrls.value.length && urlList.every((url, i) => url === uploadedUrls.value[i])) {
       return
     }
@@ -69,6 +88,9 @@ export function useFileUpload(options: {
     try {
       for (const url of limitedUrls) {
         try {
+          // 验证 URL 是否有效
+          if (!url || url.trim() === '') continue
+
           const fileName = url.split('/').pop() || `file-${Date.now()}`
 
           const fileType = guessFileType(url)

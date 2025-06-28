@@ -10,10 +10,10 @@
       @drop="handleDrop"
       @paste="handlePaste"
     >
-      <!-- 文件预览区域 - 改进布局使其与信息卡片更好地融合 -->
-      <div class="relative w-full">
+      <!-- 文件预览区域 - 只有当有文件时才显示 -->
+      <div v-if="files.length > 0" class="relative w-full">
         <!-- 单文件模式预览 -->
-        <div v-if="files.length > 0 && props.maxFiles === 1">
+        <div v-if="props.maxFiles === 1">
           <Motion
             :key="`file-${0}`"
             :initial="{ opacity: 0, scale: 0.8 }"
@@ -33,7 +33,7 @@
         </div>
 
         <!-- 多文件模式网格布局 -->
-        <div v-else-if="files.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           <Motion
             v-for="(file, idx) in files"
             :key="`file-${idx}`"
