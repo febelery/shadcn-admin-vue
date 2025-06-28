@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { useSiteHeader } from '@/stores/siteHeader'
+import { ArrowLeft } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { useSiteHeader } from '@/composables/useSiteHeader'
 import SearchForm from './SearchForm.vue'
 
-interface BreadcrumbItem {
-  title: string
-  href?: string
-}
-
-const props = defineProps<{
-  title?: string
-  breadcrumb?: BreadcrumbItem[]
-}>()
-
+const router = useRouter()
 const siteHeader = useSiteHeader()
+
+const goBack = () => {
+  router.go(-1)
+}
 </script>
 
 <template>
@@ -23,23 +20,53 @@ const siteHeader = useSiteHeader()
       <SidebarTrigger class="-ml-1" />
       <Separator orientation="vertical" class="mx-2 data-[orientation=vertical]:h-4" />
 
-      <h1 v-if="props.title || siteHeader.title" class="text-base font-medium">
-        {{ title || siteHeader.title }}
+      <!-- 返回按钮 -->
+      <Button 
+        v-if="siteHeader.showBackButton.value" 
+        variant="ghost" 
+        size="icon" 
+        @click="goBack"
+        class="mr-2"
+      >
+        <ArrowLeft class="h-4 w-4" />
+      </Button>
+
+      <!-- 页面标题 -->
+      <h1 v-if="siteHeader.title.value && !siteHeader.showBreadcrumb.value" class="text-base font-medium">
+        {{ siteHeader.title.value }}
       </h1>
 
-      <Breadcrumb v-else>
+      <!-- 面包屑导航 -->
+      <Breadcrumb v-else-if="siteHeader.showBreadcrumb.value">
         <BreadcrumbList>
-          <template v-for="(item, index) in siteHeader.breadcrumb" :key="index">
+          <template v-for="(item, index) in siteHeader.breadcrumb.value" :key="index">
             <BreadcrumbItem class="hidden md:block">
-              <BreadcrumbLink v-if="item.href" :href="item.href">
+              <BreadcrumbLink v-if="item.href" :href="item.href" class="flex items-center gap-1">
+                <component :is="item.icon" v-if="item.icon" class="h-4 w-4" />
                 {{ item.title }}
               </BreadcrumbLink>
-              <BreadcrumbPage v-else>{{ item.title }}</BreadcrumbPage>
+              <BreadcrumbPage v-else class="flex items-center gap-1">
+                <component :is="item.icon" v-if="item.icon" class="h-4 w-4" />
+                {{ item.title }}
+              </BreadcrumbPage>
             </BreadcrumbItem>
-            <BreadcrumbSeparator v-if="index < siteHeader.breadcrumb.length - 1" class="hidden md:block" />
+            <BreadcrumbSeparator v-if="index < siteHeader.breadcrumb.value.length - 1" class="hidden md:block" />
           </template>
         </BreadcrumbList>
       </Breadcrumb>
+
+      <!-- 自定义操作按钮 -->
+      <div v-if="siteHeader.customActions.value.length > 0" class="ml-auto flex items-center gap-2">
+        <component 
+          v-for="(action, index) in siteHeader.customActions.value" 
+          :key="index"
+          :is="action.component"
+          v-bind="action.props"
+          @click="action.onClick"
+        />
+      </div>
+
+      <!-- 搜索表单 -->
       <SearchForm class="w-full sm:ml-auto sm:w-auto" />
     </div>
   </header>

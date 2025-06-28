@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { ArrowLeft, Save, Eye } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { useSiteHeader } from '@/stores/siteHeader'
 import { Editor } from '@/components/editor'
 
 const router = useRouter()
-const siteHeader = useSiteHeader()
 
 const form = ref({
   title: '',
@@ -21,13 +19,6 @@ const form = ref({
 
 const isSubmitting = ref(false)
 
-onMounted(() => {
-  siteHeader.replaceBreadcrumb([
-    { title: '文章管理', href: '/dashboard/articles' },
-    { title: '写文章' },
-  ])
-})
-
 const handleSubmit = async (status: string) => {
   form.value.status = status
   isSubmitting.value = true
@@ -38,7 +29,7 @@ const handleSubmit = async (status: string) => {
     
     const action = status === 'published' ? '发布' : '保存'
     toast.success(`文章${action}成功`)
-    router.push('/dashboard/articles')
+    router.push('/articles') // 会自动重定向到 /articles/list
   } catch (error) {
     toast.error('操作失败')
   } finally {
@@ -47,7 +38,7 @@ const handleSubmit = async (status: string) => {
 }
 
 const goBack = () => {
-  router.push('/dashboard/articles')
+  router.push('/articles') // 会自动重定向到 /articles/list
 }
 </script>
 

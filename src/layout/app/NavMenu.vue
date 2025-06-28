@@ -11,63 +11,105 @@ const menuStore = useMenuStore()
 const permissionStore = usePermissionStore()
 const route = useRoute()
 
+// 初始化菜单
+onMounted(() => {
+  console.log('NavMenu mounted, initializing menu...')
+  menuStore.initializeMenu()
+  menuStore.setActiveMenuPath(route.path)
+})
+
 // 根据用户权限过滤菜单
 const filteredMenuItems = computed(() => {
-  return menuStore.filteredMenuItems(permissionStore.permissions)
+  const items = menuStore.filteredMenuItems(permissionStore.permissions)
+  console.log('Filtered menu items:', items)
+  return items
 })
 
 // 监听路由变化，设置激活状态
 watch(
   () => route.path,
   (newPath) => {
-    menuStore.setActiveMenuItem(newPath)
+    console.log('Route changed to:', newPath)
+    menuStore.setActiveMenuPath(newPath)
+  }
+)
+
+// 调试信息
+watch(
+  () => menuStore.menuItems,
+  (items) => {
+    console.log('Menu items updated:', items)
   },
   { immediate: true }
 )
 
-onMounted(() => {
-  // 初始化时设置当前路由的激活状态
-  menuStore.setActiveMenuItem(route.path)
+// 检查菜单是否正在加载
+const isLoading = computed(() => {
+  return menuStore.menuItems.length === 0
 })
 </script>
 
 <template>
   <SidebarGroup>
     <SidebarMenu>
-      <template v-for="item in filteredMenuItems" :key="item.title">
-        <!-- 没有子项的顶级菜单项 -->
-        <SidebarMenuItem v-if="!item.items || item.items.length === 0">
-          <SidebarMenuButton as-child :data-active="item.isActive">
-            <router-link :to="item.url">
-              <component :is="item.icon" v-if="item.icon" />
-              <span>{{ item.title }}</span>
-            </router-link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-
-        <!-- 有子项的菜单项使用可折叠菜单 -->
-        <Collapsible
-          v-else
-          as-child
-          :default-open="item.isActive || hasActiveChild(item.items)"
-          class="group/collapsible"
-          :animated="true"
-        >
-          <SidebarMenuItem>
-            <CollapsibleTrigger as-child>
-              <SidebarMenuButton :tooltip="item.title" :class="getMenuActiveState(item) && ''">
+      <!-- 加载状态 -->
+      <template v-if="isLoading">
+        <div class="p-4 text-sm text-muted-foreground">
+          正在加载菜单...
+        </div>
+      </template>
+      
+      <!-- 菜单项 -->
+      <template v-else>
+        <template v-for="item in filteredMenuItems" :key="item.title">
+          <!-- 没有子项的顶级菜单项 -->
+          <SidebarMenuItem v-if="!item.items || item.items.length === 0">
+            <SidebarMenuButton 
+              as-child 
+              :data-active="item.isActive"
+              :disabled="item.disabled"
+            >
+              <router-link 
+                :to="item.url"
+                :target="item.target"
+                :class="{ 'pointer-events-none opacity-50': item.disabled }"
+              >
                 <component :is="item.icon" v-if="item.icon" />
                 <span>{{ item.title }}</span>
-                <ChevronRight
-                  class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
-                />
-              </SidebarMenuButton>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <NavMenuItems :items="item.items" />
-            </CollapsibleContent>
+                <SidebarMenuBadge v-if="item.badge">{{ item.badge }}</SidebarMenuBadge>
+              </router-link>
+            </SidebarMenuButton>
           </SidebarMenuItem>
-        </Collapsible>
+
+          <!-- 有子项的菜单项使用可折叠菜单 -->
+          <Collapsible
+            v-else
+            as-child
+            :default-open="item.isActive || hasActiveChild(item.items)"
+            class="group/collapsible"
+            :animated="true"
+          >
+            <SidebarMenuItem>
+              <CollapsibleTrigger as-child>
+                <SidebarMenuButton 
+                  :tooltip="item.title" 
+                  :class="getMenuActiveState(item) && ''"
+                  :disabled="item.disabled"
+                >
+                  <component :is="item.icon" v-if="item.icon" />
+                  <span>{{ item.title }}</span>
+                  <SidebarMenuBadge v-if="item.badge">{{ item.badge }}</SidebarMenuBadge>
+                  <ChevronRight
+                    class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                  />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <NavMenuItems :items="item.items" />
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+        </template>
       </template>
     </SidebarMenu>
   </SidebarGroup>

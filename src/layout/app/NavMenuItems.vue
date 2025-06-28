@@ -12,10 +12,19 @@ const props = defineProps<{
     <template v-for="item in items" :key="item.title">
       <!-- 没有子项的菜单项 -->
       <SidebarMenuSubItem v-if="!item.items || item.items.length === 0">
-        <SidebarMenuSubButton as-child :data-active="item.isActive">
-          <router-link :to="item.url">
+        <SidebarMenuSubButton 
+          as-child 
+          :data-active="item.isActive"
+          :disabled="item.disabled"
+        >
+          <router-link 
+            :to="item.url"
+            :target="item.target"
+            :class="{ 'pointer-events-none opacity-50': item.disabled }"
+          >
             <component :is="item.icon" v-if="item.icon" />
             <span>{{ item.title }}</span>
+            <SidebarMenuBadge v-if="item.badge">{{ item.badge }}</SidebarMenuBadge>
           </router-link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
@@ -29,9 +38,13 @@ const props = defineProps<{
       >
         <SidebarMenuSubItem>
           <CollapsibleTrigger as-child>
-            <SidebarMenuSubButton :class="getMenuActiveState(item) && ''">
+            <SidebarMenuSubButton 
+              :class="getMenuActiveState(item) && ''"
+              :disabled="item.disabled"
+            >
               <component :is="item.icon" v-if="item.icon" />
               <span>{{ item.title }}</span>
+              <SidebarMenuBadge v-if="item.badge">{{ item.badge }}</SidebarMenuBadge>
               <ChevronRight
                 class="ml-auto transition-transform duration-200 group-data-[state=open]/subcollapsible:rotate-90"
               />

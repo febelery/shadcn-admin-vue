@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { ArrowLeft, Save } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { useSiteHeader } from '@/stores/siteHeader'
 
 const router = useRouter()
-const siteHeader = useSiteHeader()
 
 const form = ref({
   name: '',
@@ -18,13 +16,6 @@ const form = ref({
 })
 
 const isSubmitting = ref(false)
-
-onMounted(() => {
-  siteHeader.replaceBreadcrumb([
-    { title: '用户管理', href: '/dashboard/users' },
-    { title: '添加用户' },
-  ])
-})
 
 const handleSubmit = async () => {
   if (form.value.password !== form.value.confirmPassword) {
@@ -39,7 +30,7 @@ const handleSubmit = async () => {
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     toast.success('用户创建成功')
-    router.push('/dashboard/users')
+    router.push('/users') // 会自动重定向到 /users/list
   } catch (error) {
     toast.error('创建用户失败')
   } finally {
@@ -48,7 +39,7 @@ const handleSubmit = async () => {
 }
 
 const goBack = () => {
-  router.push('/dashboard/users')
+  router.push('/users') // 会自动重定向到 /users/list
 }
 </script>
 

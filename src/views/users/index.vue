@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-vue-next'
-import { useSiteHeader } from '@/stores/siteHeader'
+import { useRouter } from 'vue-router'
 
-const siteHeader = useSiteHeader()
+const router = useRouter()
 
 // 模拟用户数据
 const users = ref([
@@ -38,13 +38,6 @@ const users = ref([
 
 const searchQuery = ref('')
 
-onMounted(() => {
-  siteHeader.replaceBreadcrumb([
-    { title: '用户管理', href: '/dashboard/users' },
-    { title: '用户列表' },
-  ])
-})
-
 const getStatusBadgeVariant = (status: string) => {
   return status === '活跃' ? 'default' : 'secondary'
 }
@@ -59,6 +52,11 @@ const getRoleBadgeVariant = (role: string) => {
       return 'outline'
   }
 }
+
+// 使用编程式导航
+const navigateToCreate = () => {
+  router.push('/users/create')
+}
 </script>
 
 <template>
@@ -66,10 +64,10 @@ const getRoleBadgeVariant = (role: string) => {
     <!-- 页面头部 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight">用户管理</h1>
+        <h1 class="text-2xl font-bold tracking-tight">用户列表</h1>
         <p class="text-muted-foreground">管理系统中的所有用户账户</p>
       </div>
-      <Button>
+      <Button @click="navigateToCreate">
         <Plus class="mr-2 h-4 w-4" />
         添加用户
       </Button>

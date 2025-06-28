@@ -1,307 +1,163 @@
 import { defineStore } from 'pinia'
-import type { LucideIcon } from 'lucide-vue-next'
-import { 
-  BookOpen, 
-  Bot, 
-  CircleHelp, 
-  Settings, 
-  Settings2, 
-  SquareTerminal, 
-  Users, 
-  FileText,
-  UserPlus,
-  UserCheck,
-  Edit3,
-  FileEdit,
-  Archive
-} from 'lucide-vue-next'
-
-export interface MenuItem {
-  title: string
-  url: string
-  icon?: LucideIcon
-  isActive?: boolean
-  items?: MenuItem[]
-  permission?: string // 权限标识
-}
+import { computed, ref } from 'vue'
+import router from '@/router'
+import { generateMenuFromRoutes, filterMenuByPermissions, findActiveMenuPath, setMenuActiveState } from '@/utils/menuGenerator'
+import type { MenuItem } from '@/types/menu'
 
 interface MenuState {
   menuItems: MenuItem[]
+  activeMenuPath: string[]
 }
 
-export const useMenuStore = defineStore('menu', {
-  state: (): MenuState => ({
-    menuItems: [
-      {
-        title: '用户管理',
-        url: '/dashboard/users',
-        icon: Users,
-        permission: 'users.view',
-        items: [
-          {
-            title: '用户列表',
-            url: '/dashboard/users',
-            icon: Users,
-            permission: 'users.view',
-          },
-          {
-            title: '添加用户',
-            url: '/dashboard/users/create',
-            icon: UserPlus,
-            permission: 'users.create',
-          },
-          {
-            title: '用户审核',
-            url: '/dashboard/users/audit',
-            icon: UserCheck,
-            permission: 'users.audit',
-          },
-        ],
-      },
-      {
-        title: '文章管理',
-        url: '/dashboard/articles',
-        icon: FileText,
-        permission: 'articles.view',
-        items: [
-          {
-            title: '文章列表',
-            url: '/dashboard/articles',
-            icon: FileText,
-            permission: 'articles.view',
-          },
-          {
-            title: '写文章',
-            url: '/dashboard/articles/create',
-            icon: Edit3,
-            permission: 'articles.create',
-          },
-          {
-            title: '文章编辑',
-            url: '/dashboard/articles/edit',
-            icon: FileEdit,
-            permission: 'articles.edit',
-          },
-          {
-            title: '文章归档',
-            url: '/dashboard/articles/archive',
-            icon: Archive,
-            permission: 'articles.archive',
-          },
-        ],
-      },
-      {
-        title: 'Playground',
-        url: '#',
-        icon: SquareTerminal,
-        items: [
-          {
-            title: 'History',
-            url: '#',
-          },
-          {
-            title: 'Starred',
-            url: '#',
-          },
-          {
-            title: '第二级菜单',
-            url: '#',
-            items: [
-              {
-                title: '第三级菜单',
-                url: '#',
-              },
-              {
-                title: 'Starred',
-                url: '#',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: 'Models',
-        url: '#',
-        icon: Bot,
-        items: [
-          {
-            title: 'Genesis',
-            url: '#',
-          },
-          {
-            title: 'Explorer',
-            url: '#',
-          },
-          {
-            title: 'Quantum',
-            url: '#',
-          },
-        ],
-      },
-      {
-        title: 'Documentation',
-        url: '#',
-        icon: BookOpen,
-        items: [
-          {
-            title: 'Introduction',
-            url: '#',
-          },
-          {
-            title: 'Get Started',
-            url: '#',
-          },
-          {
-            title: 'Tutorials',
-            url: '#',
-          },
-          {
-            title: 'Changelog',
-            url: '#',
-          },
-        ],
-      },
-      {
-        title: 'Settings',
-        url: '#',
-        icon: Settings2,
-        items: [
-          {
-            title: 'General',
-            url: '#',
-          },
-          {
-            title: 'Team',
-            url: '#',
-          },
-          {
-            title: 'Billing',
-            url: '#',
-          },
-          {
-            title: 'Limits',
-            url: '#',
-          },
-        ],
-      },
-    ],
-  }),
+export const useMenuStore = defineStore('menu', () => {
+  const state = ref<MenuState>({
+    menuItems: [],
+    activeMenuPath: [],
+  })
 
-  getters: {
-    // 根据用户权限过滤菜单
-    filteredMenuItems: (state) => {
-      return (userPermissions: string[] = []) => {
-        const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
-          return items
-            .filter((item) => {
-              // 如果没有权限要求，或者用户有对应权限，则显示
-              if (!item.permission || userPermissions.includes(item.permission)) {
-                return true
-              }
-              // 如果有子菜单，检查子菜单是否有可访问的项
-              if (item.items && item.items.length > 0) {
-                const filteredSubItems = filterMenuItems(item.items)
-                return filteredSubItems.length > 0
-              }
-              return false
-            })
-            .map((item) => ({
-              ...item,
-              items: item.items ? filterMenuItems(item.items) : undefined,
-            }))
+  // 从路由自动生成菜单
+  const generateMenuFromRouter = () => {
+    const routes = router.getRoutes()
+    console.log('All routes:', routes)
+    
+    // 过滤出需要显示在菜单中的路由
+    // 只处理顶级路由（有 children 的路由）
+    const menuRoutes = routes.filter(route => {
+      // 只处理有 meta.title 的路由，且不隐藏的路由
+      return route.meta?.title && 
+             !route.meta?.hideInMenu &&
+             route.path !== '/' && // 排除根路径
+             route.path !== '/login' && // 排除登录页
+             route.path !== '/coming-soon' && // 排除 coming soon 页面
+             !route.path.startsWith('/errors') && // 排除错误页面
+             route.children && route.children.length > 0 // 只处理有子路由的路由
+    })
+
+    console.log('Filtered menu routes:', menuRoutes)
+
+    // 直接使用过滤后的路由生成菜单
+    state.value.menuItems = generateMenuFromRoutes(menuRoutes)
+    console.log('Generated menu items:', state.value.menuItems)
+  }
+
+  // 根据权限过滤菜单
+  const filteredMenuItems = computed(() => {
+    return (userPermissions: string[] = []) => {
+      return filterMenuByPermissions(state.value.menuItems, userPermissions)
+    }
+  })
+
+  // 设置激活菜单路径
+  const setActiveMenuPath = (path: string) => {
+    console.log('Setting active menu path:', path)
+    
+    // 设置菜单项的激活状态
+    setMenuActiveState(state.value.menuItems, path)
+    
+    // 查找激活路径
+    state.value.activeMenuPath = findActiveMenuPath(state.value.menuItems, path)
+    
+    console.log('Active menu path set to:', state.value.activeMenuPath)
+    console.log('Updated menu items:', state.value.menuItems)
+  }
+
+  // 获取当前激活的菜单项
+  const activeMenuItem = computed(() => {
+    const path = state.value.activeMenuPath
+    if (path.length === 0) return null
+    
+    const findMenuItem = (items: MenuItem[], targetPath: string): MenuItem | null => {
+      for (const item of items) {
+        if (item.url === targetPath) {
+          return item
         }
-
-        return filterMenuItems(state.menuItems)
-      }
-    },
-
-    // 获取当前激活的菜单项
-    activeMenuItem: (state) => {
-      return (currentPath: string) => {
-        const findActiveItem = (items: MenuItem[]): MenuItem | null => {
-          for (const item of items) {
-            if (item.url === currentPath) {
-              return item
-            }
-            if (item.items) {
-              const found = findActiveItem(item.items)
-              if (found) return found
-            }
-          }
-          return null
+        if (item.items) {
+          const found = findMenuItem(item.items, targetPath)
+          if (found) return found
         }
-
-        return findActiveItem(state.menuItems)
       }
-    },
-  },
+      return null
+    }
+    
+    return findMenuItem(state.value.menuItems, path[path.length - 1])
+  })
 
-  actions: {
-    // 设置菜单项激活状态
-    setActiveMenuItem(path: string) {
-      const setActive = (items: MenuItem[]) => {
-        items.forEach((item) => {
-          item.isActive = item.url === path
-          if (item.items) {
-            setActive(item.items)
+  // 添加菜单项
+  const addMenuItem = (menuItem: MenuItem, parentPath?: string) => {
+    if (!parentPath) {
+      state.value.menuItems.push(menuItem)
+    } else {
+      const findParent = (items: MenuItem[]): boolean => {
+        for (const item of items) {
+          if (item.url === parentPath) {
+            if (!item.items) item.items = []
+            item.items.push(menuItem)
+            return true
           }
-        })
-      }
-
-      setActive(this.menuItems)
-    },
-
-    // 添加菜单项
-    addMenuItem(menuItem: MenuItem, parentPath?: string) {
-      if (!parentPath) {
-        this.menuItems.push(menuItem)
-      } else {
-        const findParent = (items: MenuItem[]): boolean => {
-          for (const item of items) {
-            if (item.url === parentPath) {
-              if (!item.items) item.items = []
-              item.items.push(menuItem)
-              return true
-            }
-            if (item.items && findParent(item.items)) {
-              return true
-            }
+          if (item.items && findParent(item.items)) {
+            return true
           }
-          return false
         }
-
-        findParent(this.menuItems)
+        return false
       }
-    },
+      findParent(state.value.menuItems)
+    }
+    
+    // 重新排序
+    state.value.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
+  }
 
-    // 移除菜单项
-    removeMenuItem(path: string) {
-      const removeItem = (items: MenuItem[]): MenuItem[] => {
-        return items
-          .filter((item) => item.url !== path)
-          .map((item) => ({
-            ...item,
-            items: item.items ? removeItem(item.items) : undefined,
-          }))
-      }
+  // 移除菜单项
+  const removeMenuItem = (path: string) => {
+    const removeItem = (items: MenuItem[]): MenuItem[] => {
+      return items
+        .filter(item => item.url !== path)
+        .map(item => ({
+          ...item,
+          items: item.items ? removeItem(item.items) : undefined,
+        }))
+    }
+    
+    state.value.menuItems = removeItem(state.value.menuItems)
+  }
 
-      this.menuItems = removeItem(this.menuItems)
-    },
+  // 更新菜单项
+  const updateMenuItem = (path: string, updates: Partial<MenuItem>) => {
+    const updateItem = (items: MenuItem[]) => {
+      items.forEach(item => {
+        if (item.url === path) {
+          Object.assign(item, updates)
+        }
+        if (item.items) {
+          updateItem(item.items)
+        }
+      })
+    }
+    
+    updateItem(state.value.menuItems)
+  }
 
-    // 更新菜单项
-    updateMenuItem(path: string, updates: Partial<MenuItem>) {
-      const updateItem = (items: MenuItem[]) => {
-        items.forEach((item) => {
-          if (item.url === path) {
-            Object.assign(item, updates)
-          }
-          if (item.items) {
-            updateItem(item.items)
-          }
-        })
-      }
+  // 初始化菜单
+  const initializeMenu = () => {
+    console.log('Initializing menu...')
+    generateMenuFromRouter()
+  }
 
-      updateItem(this.menuItems)
-    },
-  },
+  return {
+    // state
+    menuItems: computed(() => state.value.menuItems),
+    activeMenuPath: computed(() => state.value.activeMenuPath),
+    
+    // getters
+    filteredMenuItems,
+    activeMenuItem,
+    
+    // actions
+    generateMenuFromRouter,
+    setActiveMenuPath,
+    addMenuItem,
+    removeMenuItem,
+    updateMenuItem,
+    initializeMenu,
+  }
 })

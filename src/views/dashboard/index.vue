@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useSiteHeader } from '@/stores/siteHeader'
-import SectionCards from './components/SectionCards.vue'
+// 移除手动设置标题的代码，现在完全自动化
+// import { onMounted } from 'vue'
+// import { useSiteHeader } from '@/stores/siteHeader'
+// import SectionCards from './components/SectionCards.vue'
 
-onMounted(() => {
-  useSiteHeader().setTitle('Dashboard')
-})
+// onMounted(() => {
+//   useSiteHeader().setTitle('Dashboard')
+// })
+
+import SectionCards from './components/SectionCards.vue'
 </script>
 
 <template>

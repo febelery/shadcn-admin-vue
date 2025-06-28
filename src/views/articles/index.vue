@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye, Calendar } from 'lucide-vue-next'
-import { useSiteHeader } from '@/stores/siteHeader'
-
-const siteHeader = useSiteHeader()
 
 // 模拟文章数据
 const articles = ref([
@@ -44,13 +41,6 @@ const articles = ref([
 
 const searchQuery = ref('')
 
-onMounted(() => {
-  siteHeader.replaceBreadcrumb([
-    { title: '文章管理', href: '/dashboard/articles' },
-    { title: '文章列表' },
-  ])
-})
-
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
     case '已发布':
@@ -86,9 +76,11 @@ const getCategoryBadgeVariant = (category: string) => {
         <h1 class="text-2xl font-bold tracking-tight">文章管理</h1>
         <p class="text-muted-foreground">管理系统中的所有文章内容</p>
       </div>
-      <Button>
-        <Plus class="mr-2 h-4 w-4" />
-        写文章
+      <Button as-child>
+        <router-link to="/articles/create">
+          <Plus class="mr-2 h-4 w-4" />
+          写文章
+        </router-link>
       </Button>
     </div>
 

@@ -8,23 +8,43 @@ interface PermissionState {
 export const usePermissionStore = defineStore('permission', {
   state: (): PermissionState => ({
     permissions: [
+      // 用户权限
+      'users',
       'users.view',
       'users.create',
       'users.edit',
       'users.delete',
       'users.audit',
+      'users.permissions',
+      
+      // 文章权限
+      'articles',
       'articles.view',
       'articles.create',
       'articles.edit',
       'articles.delete',
       'articles.archive',
+      'articles.categories',
+      'articles.tags',
+      
+      // 系统权限
+      'system',
+      'system.view',
+      'system.settings',
+      'system.database',
+      'system.security',
+      'system.notifications',
+      'system.logs',
     ],
     roles: ['admin', 'editor', 'user'],
   }),
 
   getters: {
     hasPermission: (state) => {
-      return (permission: string) => {
+      return (permission: string | string[]) => {
+        if (Array.isArray(permission)) {
+          return permission.some(p => state.permissions.includes(p))
+        }
         return state.permissions.includes(permission)
       }
     },
