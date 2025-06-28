@@ -1,51 +1,86 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ArrowLeft, Save } from 'lucide-vue-next'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import * as z from 'zod'
 
 const router = useRouter()
+const route = useRoute()
 
-// 定义表单验证 schema
-const formSchema = z.object({
+// 定义表单验证 schema（编辑时密码可选）
+const editFormSchema = z.object({
   name: z.string().min(2, '姓名至少需要2个字符').max(50, '姓名不能超过50个字符'),
   email: z.string().email('请输入有效的邮箱地址'),
   password: z.string()
     .min(8, '密码至少需要8个字符')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密码必须包含大小写字母和数字'),
-  confirmPassword: z.string(),
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密码必须包含大小写字母和数字')
+    .optional()
+    .or(z.literal('')),
+  confirmPassword: z.string().optional().or(z.literal('')),
   role: z.enum(['admin', 'editor', 'user'], {
     required_error: '请选择用户角色',
   }),
   status: z.enum(['active', 'inactive'], {
     required_error: '请选择用户状态',
   }),
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => {
+  // 如果输入了密码，则必须确认密码
+  if (data.password && data.password.length > 0) {
+    return data.password === data.confirmPassword
+  }
+  return true
+}, {
   message: '密码确认不匹配',
   path: ['confirmPassword'],
 })
 
 const isSubmitting = ref(false)
+const initialData = ref({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  role: 'user' as const,
+  status: 'active' as const,
+})
 
-const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+// 模拟加载用户数据
+onMounted(async () => {
+  const userId = route.params.id
+  if (userId) {
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // 模拟数据
+    initialData.value = {
+      name: '张三',
+      email: 'zhangsan@example.com',
+      password: '',
+      confirmPassword: '',
+      role: 'editor',
+      status: 'active',
+    }
+  }
+})
+
+const handleSubmit = async (values: z.infer<typeof editFormSchema>) => {
   isSubmitting.value = true
   
   try {
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    toast.success('用户创建成功')
-    router.push('/users') // 会自动重定向到 /users/list
+    toast.success('用户信息更新成功')
+    router.push('/users')
   } catch (error) {
-    toast.error('创建用户失败')
+    toast.error('更新用户信息失败')
   } finally {
     isSubmitting.value = false
   }
 }
 
 const goBack = () => {
-  router.push('/users') // 会自动重定向到 /users/list
+  router.push('/users')
 }
 </script>
 
@@ -57,8 +92,8 @@ const goBack = () => {
         <ArrowLeft class="h-4 w-4" />
       </Button>
       <div>
-        <h1 class="text-2xl font-bold tracking-tight">添加用户</h1>
-        <p class="text-muted-foreground">创建新的用户账户</p>
+        <h1 class="text-2xl font-bold tracking-tight">编辑用户</h1>
+        <p class="text-muted-foreground">修改用户账户信息</p>
       </div>
     </div>
 
@@ -68,11 +103,12 @@ const goBack = () => {
         <Card>
           <CardHeader>
             <CardTitle>用户信息</CardTitle>
-            <CardDescription>填写用户的基本信息</CardDescription>
+            <CardDescription>修改用户的基本信息</CardDescription>
           </CardHeader>
           <CardContent>
             <AutoForm
-              :schema="formSchema"
+              :schema="editFormSchema"
+              :default-values="initialData"
               :field-config="{
                 name: {
                   label: '姓名',
@@ -90,18 +126,18 @@ const goBack = () => {
                   },
                 },
                 password: {
-                  label: '密码',
-                  description: '密码必须包含大小写字母和数字，至少8位',
+                  label: '新密码',
+                  description: '留空则不修改密码。如需修改，密码必须包含大小写字母和数字，至少8位',
                   inputProps: {
-                    placeholder: '请输入密码',
+                    placeholder: '留空则不修改密码',
                     type: 'password',
                   },
                 },
                 confirmPassword: {
-                  label: '确认密码',
-                  description: '请再次输入密码以确认',
+                  label: '确认新密码',
+                  description: '如果修改密码，请再次输入新密码以确认',
                   inputProps: {
-                    placeholder: '请再次输入密码',
+                    placeholder: '确认新密码',
                     type: 'password',
                   },
                 },
@@ -122,7 +158,7 @@ const goBack = () => {
               <div class="flex gap-4 pt-4">
                 <Button type="submit" :disabled="isSubmitting" class="flex-1">
                   <Save class="mr-2 h-4 w-4" />
-                  {{ isSubmitting ? '创建中...' : '创建用户' }}
+                  {{ isSubmitting ? '保存中...' : '保存更改' }}
                 </Button>
                 <Button type="button" variant="outline" @click="goBack" class="flex-1">
                   取消
@@ -137,25 +173,25 @@ const goBack = () => {
       <div class="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>创建提示</CardTitle>
+            <CardTitle>编辑提示</CardTitle>
           </CardHeader>
           <CardContent>
             <ul class="text-sm text-muted-foreground space-y-2">
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-                <span>密码至少8位字符，包含大小写字母和数字</span>
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <span>密码字段留空则不修改当前密码</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-                <span>邮箱将用于登录和接收系统通知</span>
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <span>修改邮箱后用户需要使用新邮箱登录</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-                <span>角色决定用户在系统中的权限范围</span>
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <span>角色变更会立即影响用户权限</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-                <span>创建后可以随时修改用户信息</span>
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <span>禁用用户将阻止其登录系统</span>
               </li>
             </ul>
           </CardContent>
@@ -163,21 +199,21 @@ const goBack = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>角色说明</CardTitle>
+            <CardTitle>操作记录</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="space-y-3 text-sm">
-              <div>
-                <div class="font-medium text-red-600">管理员</div>
-                <div class="text-muted-foreground">拥有系统所有权限</div>
+              <div class="flex justify-between">
+                <span class="text-muted-foreground">创建时间</span>
+                <span>2024-01-15</span>
               </div>
-              <div>
-                <div class="font-medium text-blue-600">编辑</div>
-                <div class="text-muted-foreground">可以管理内容和用户</div>
+              <div class="flex justify-between">
+                <span class="text-muted-foreground">最后登录</span>
+                <span>2024-01-20</span>
               </div>
-              <div>
-                <div class="font-medium text-green-600">用户</div>
-                <div class="text-muted-foreground">基础使用权限</div>
+              <div class="flex justify-between">
+                <span class="text-muted-foreground">最后修改</span>
+                <span>2024-01-18</span>
               </div>
             </div>
           </CardContent>

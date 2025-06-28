@@ -86,16 +86,12 @@ function processRouteChildren(children: RouteRecordRaw[], parentPath: string): M
  * @returns 菜单项数组
  */
 export function generateMenuFromRoutes(routes: RouteRecordRaw[]): MenuItem[] {
-  console.log('Generating menu from routes:', routes)
-  
   const menuItems: MenuItem[] = []
   
   // 只处理菜单根节点
   const menuRoots = routes.filter(route => {
     return shouldShowInMenu(route) && isMenuRoot(route)
   })
-  
-  console.log('Menu root routes:', menuRoots)
   
   // 处理每个菜单根节点
   menuRoots.forEach(route => {
@@ -129,7 +125,6 @@ export function generateMenuFromRoutes(routes: RouteRecordRaw[]): MenuItem[] {
   // 对顶级菜单排序
   menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
   
-  console.log('Generated menu items:', menuItems)
   return menuItems
 }
 

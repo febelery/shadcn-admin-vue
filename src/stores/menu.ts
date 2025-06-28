@@ -17,11 +17,8 @@ export const useMenuStore = defineStore('menu', () => {
 
   // 从菜单路由生成菜单
   const generateMenuFromRouter = () => {
-    console.log('Menu routes from modules folder:', menuRoutes)
-    
     // 直接使用 modules 文件夹下的路由生成菜单
     state.value.menuItems = generateMenuFromRoutes(menuRoutes)
-    console.log('Generated menu items:', state.value.menuItems)
   }
 
   // 根据权限过滤菜单
@@ -33,16 +30,11 @@ export const useMenuStore = defineStore('menu', () => {
 
   // 设置激活菜单路径
   const setActiveMenuPath = (path: string) => {
-    console.log('Setting active menu path:', path)
-    
     // 设置菜单项的激活状态
     setMenuActiveState(state.value.menuItems, path)
     
     // 查找激活路径
     state.value.activeMenuPath = findActiveMenuPath(state.value.menuItems, path)
-    
-    console.log('Active menu path set to:', state.value.activeMenuPath)
-    console.log('Updated menu items:', state.value.menuItems)
   }
 
   // 获取当前激活的菜单项
@@ -123,7 +115,6 @@ export const useMenuStore = defineStore('menu', () => {
 
   // 初始化菜单
   const initializeMenu = () => {
-    console.log('Initializing menu...')
     generateMenuFromRouter()
   }
 

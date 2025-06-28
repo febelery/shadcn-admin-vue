@@ -50,29 +50,24 @@
     <div class="p-8 pt-4">
       <AutoForm
         class="space-y-6"
-        :schema="
-          z.object({
-            username: z.string().min(2),
-            password: z.string().min(6),
-          })
-        "
+        :schema="loginSchema"
         :field-config="{
           username: {
             label: '用户名',
+            description: '请输入您的用户名或邮箱',
             inputProps: {
               placeholder: '请输入用户名',
-              class:
-                'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
+              class: 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
             },
           },
           password: {
             label: '密码',
+            description: '请输入您的登录密码',
             inputProps: {
               type: 'password',
               placeholder: '请输入密码',
-              autocomplete: 'new-password',
-              class:
-                'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
+              autocomplete: 'current-password',
+              class: 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
             },
           },
         }"
@@ -92,8 +87,6 @@
 <script setup lang="ts">
 import { Lock } from 'lucide-vue-next'
 import * as z from 'zod'
-import { ref } from 'vue'
-import { toast } from 'vue-sonner'
 
 const props = defineProps<{
   isSubmitting?: boolean
@@ -101,8 +94,18 @@ const props = defineProps<{
 
 const emit = defineEmits(['submit'])
 
+// 定义登录表单验证 schema
+const loginSchema = z.object({
+  username: z.string()
+    .min(2, '用户名至少需要2个字符')
+    .max(50, '用户名不能超过50个字符'),
+  password: z.string()
+    .min(6, '密码至少需要6个字符')
+    .max(100, '密码不能超过100个字符'),
+})
+
 // 表单提交处理函数
-function onSubmit(values: Record<string, any>) {
+function onSubmit(values: z.infer<typeof loginSchema>) {
   emit('submit', values)
 }
 </script>

@@ -13,7 +13,6 @@ const route = useRoute()
 
 // 初始化菜单
 onMounted(() => {
-  console.log('NavMenu mounted, initializing menu...')
   menuStore.initializeMenu()
   menuStore.setActiveMenuPath(route.path)
 })
@@ -21,7 +20,6 @@ onMounted(() => {
 // 根据用户权限过滤菜单
 const filteredMenuItems = computed(() => {
   const items = menuStore.filteredMenuItems(permissionStore.permissions)
-  console.log('Filtered menu items:', items)
   return items
 })
 
@@ -29,18 +27,8 @@ const filteredMenuItems = computed(() => {
 watch(
   () => route.path,
   (newPath) => {
-    console.log('Route changed to:', newPath)
     menuStore.setActiveMenuPath(newPath)
   }
-)
-
-// 调试信息
-watch(
-  () => menuStore.menuItems,
-  (items) => {
-    console.log('Menu items updated:', items)
-  },
-  { immediate: true }
 )
 
 // 检查菜单是否正在加载
