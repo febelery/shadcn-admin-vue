@@ -119,7 +119,7 @@ const goBack = () => {
                   description: '文章的封面图片，建议尺寸 16:9',
                   component: 'fileUpload',
                   inputProps: {
-                    maxFiles: 1,
+                    maxFiles: 2,
                     acceptedTypes: [FileType.IMAGE_ALL],
                     maxSize: 5 * 1024 * 1024, // 5MB
                     autoUpload: true,
