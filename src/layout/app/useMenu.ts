@@ -7,6 +7,13 @@ export interface MenuItem {
   icon?: LucideIcon
   isActive?: boolean
   items?: MenuItem[]
+  permission?: string | string[]
+  order?: number
+  group?: string
+  badge?: string | number
+  disabled?: boolean
+  external?: boolean
+  target?: string
 }
 
 // 递归检查是否有激活的子项

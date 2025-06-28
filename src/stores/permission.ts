@@ -24,6 +24,8 @@ export const usePermissionStore = defineStore('permission', {
       'articles.edit',
       'articles.delete',
       'articles.archive',
+      'articles.archive.time',
+      'articles.archive.topic',
       'articles.categories',
       'articles.tags',
       

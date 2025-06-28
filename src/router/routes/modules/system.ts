@@ -4,13 +4,14 @@ import { Settings, Database, Shield, Bell, Activity } from 'lucide-vue-next'
 const system: RouteRecordRaw = {
   path: '/system',
   component: () => import('@/layout/app/AppSidebar.vue'),
-  redirect: '/system/settings', // 重定向到默认子路由
+  redirect: '/system/settings', // 直接重定向到默认子路由
   meta: {
     title: '系统',
     icon: Settings,
     permission: 'system',
     order: 4,
     group: 'system',
+    isMenuRoot: true, // 明确标记为菜单根节点
   },
   children: [
     {
@@ -21,7 +22,6 @@ const system: RouteRecordRaw = {
         title: '系统设置',
         icon: Settings,
         permission: 'system.settings',
-        isDefault: true, // 标记为默认路由
         order: 1,
       },
     },

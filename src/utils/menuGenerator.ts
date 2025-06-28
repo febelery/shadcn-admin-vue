@@ -1,5 +1,84 @@
 import type { RouteRecordRaw } from 'vue-router'
-import type { MenuItem, ExtendedRouteRecordRaw, RouteMeta } from '@/types/menu'
+import type { MenuItem, RouteMeta } from '@/types/menu'
+
+/**
+ * 判断路由是否应该显示在菜单中
+ * @param route 路由记录
+ * @returns 是否显示在菜单中
+ */
+function shouldShowInMenu(route: RouteRecordRaw): boolean {
+  const meta = route.meta as RouteMeta
+  
+  // 1. 必须有标题
+  if (!meta?.title) return false
+  
+  // 2. 明确标记为隐藏的不显示
+  if (meta.hideInMenu) return false
+  
+  return true
+}
+
+/**
+ * 判断是否为菜单根节点
+ * @param route 路由记录
+ * @returns 是否为菜单根节点
+ */
+function isMenuRoot(route: RouteRecordRaw): boolean {
+  // 智能判断：顶级路由且有子路由
+  const pathSegments = route.path.split('/').filter(Boolean)
+  const isTopLevel = pathSegments.length === 1
+  const hasChildren = route.children && route.children.length > 0
+  
+  return isTopLevel && hasChildren
+}
+
+/**
+ * 递归处理路由的子路由
+ * @param children 子路由数组
+ * @param parentPath 父路径
+ * @returns 菜单项数组
+ */
+function processRouteChildren(children: RouteRecordRaw[], parentPath: string): MenuItem[] {
+  const menuItems: MenuItem[] = []
+  
+  children.forEach(child => {
+    // 检查是否应该显示在菜单中
+    if (!shouldShowInMenu(child)) {
+      return
+    }
+
+    const childMeta = child.meta as RouteMeta
+    const childPath = child.path === '' ? parentPath : `${parentPath}/${child.path}`
+    
+    const childMenuItem: MenuItem = {
+      title: childMeta.title!,
+      url: childPath,
+      icon: childMeta.icon,
+      permission: childMeta.permission,
+      order: childMeta.order || 0,
+      group: childMeta.group,
+      badge: childMeta.badge,
+      disabled: childMeta.disabled,
+      external: childMeta.external,
+      target: childMeta.target,
+    }
+
+    // 递归处理子路由的子路由
+    if (child.children && child.children.length > 0) {
+      const subItems = processRouteChildren(child.children, childPath)
+      if (subItems.length > 0) {
+        childMenuItem.items = subItems
+      }
+    }
+
+    menuItems.push(childMenuItem)
+  })
+
+  // 对菜单项排序
+  menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
+  
+  return menuItems
+}
 
 /**
  * 从路由配置自动生成菜单
@@ -11,84 +90,40 @@ export function generateMenuFromRoutes(routes: RouteRecordRaw[]): MenuItem[] {
   
   const menuItems: MenuItem[] = []
   
-  // 处理每个路由
-  routes.forEach(route => {
+  // 只处理菜单根节点
+  const menuRoots = routes.filter(route => {
+    return shouldShowInMenu(route) && isMenuRoot(route)
+  })
+  
+  console.log('Menu root routes:', menuRoots)
+  
+  // 处理每个菜单根节点
+  menuRoots.forEach(route => {
     const meta = route.meta as RouteMeta
     
-    // 跳过不需要显示在菜单中的路由
-    if (!meta?.title || meta.hideInMenu) {
-      return
+    const parentMenuItem: MenuItem = {
+      title: meta.title!,
+      url: route.path,
+      icon: meta.icon,
+      permission: meta.permission,
+      order: meta.order || 0,
+      group: meta.group,
+      badge: meta.badge,
+      disabled: meta.disabled,
+      external: meta.external,
+      target: meta.target,
+      items: [],
     }
 
-    // 检查是否有子路由
-    const hasChildren = route.children && route.children.length > 0
-    
-    if (hasChildren) {
-      // 处理有子路由的情况
-      const parentMenuItem: MenuItem = {
-        title: meta.title,
-        url: route.path,
-        icon: meta.icon,
-        permission: meta.permission,
-        order: meta.order || 0,
-        group: meta.group,
-        badge: meta.badge,
-        disabled: meta.disabled,
-        external: meta.external,
-        target: meta.target,
-        items: [],
+    // 递归处理子路由
+    if (route.children && route.children.length > 0) {
+      const childItems = processRouteChildren(route.children, route.path)
+      if (childItems.length > 0) {
+        parentMenuItem.items = childItems
       }
-
-      // 处理子路由
-      route.children?.forEach(child => {
-        const childMeta = child.meta as RouteMeta
-        
-        // 跳过隐藏的子路由
-        if (!childMeta?.title || childMeta.hideInMenu) {
-          return
-        }
-
-        const childPath = child.path === '' ? route.path : `${route.path}/${child.path}`
-        
-        const childMenuItem: MenuItem = {
-          title: childMeta.title,
-          url: childPath,
-          icon: childMeta.icon,
-          permission: childMeta.permission,
-          order: childMeta.order || 0,
-          group: childMeta.group,
-          badge: childMeta.badge,
-          disabled: childMeta.disabled,
-          external: childMeta.external,
-          target: childMeta.target,
-        }
-
-        parentMenuItem.items!.push(childMenuItem)
-      })
-
-      // 对子菜单排序
-      if (parentMenuItem.items && parentMenuItem.items.length > 0) {
-        parentMenuItem.items.sort((a, b) => (a.order || 0) - (b.order || 0))
-      }
-
-      menuItems.push(parentMenuItem)
-    } else {
-      // 处理没有子路由的情况
-      const menuItem: MenuItem = {
-        title: meta.title,
-        url: route.path,
-        icon: meta.icon,
-        permission: meta.permission,
-        order: meta.order || 0,
-        group: meta.group,
-        badge: meta.badge,
-        disabled: meta.disabled,
-        external: meta.external,
-        target: meta.target,
-      }
-
-      menuItems.push(menuItem)
     }
+
+    menuItems.push(parentMenuItem)
   })
 
   // 对顶级菜单排序
@@ -99,7 +134,7 @@ export function generateMenuFromRoutes(routes: RouteRecordRaw[]): MenuItem[] {
 }
 
 /**
- * 根据权限过滤菜单
+ * 根据权限过滤菜单（递归处理）
  * @param menuItems 菜单项数组
  * @param userPermissions 用户权限数组
  * @returns 过滤后的菜单项数组
@@ -150,7 +185,7 @@ export function groupMenuItems(menuItems: MenuItem[]): Record<string, MenuItem[]
 }
 
 /**
- * 查找激活的菜单项
+ * 递归查找激活的菜单项
  * @param menuItems 菜单项数组
  * @param currentPath 当前路径
  * @returns 激活的菜单项路径数组
@@ -183,7 +218,7 @@ export function findActiveMenuPath(menuItems: MenuItem[], currentPath: string): 
 }
 
 /**
- * 设置菜单项的激活状态
+ * 递归设置菜单项的激活状态
  * @param menuItems 菜单项数组
  * @param currentPath 当前路径
  */

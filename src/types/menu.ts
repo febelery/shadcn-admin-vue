@@ -52,5 +52,4 @@ export interface RouteMeta {
   hideBreadcrumb?: boolean
   requiresAuth?: boolean
   roles?: string[]
-  isDefault?: boolean // 标记是否为默认子路由
 }

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import router from '@/router'
+import { menuRoutes } from '@/router/routes'
 import { generateMenuFromRoutes, filterMenuByPermissions, findActiveMenuPath, setMenuActiveState } from '@/utils/menuGenerator'
 import type { MenuItem } from '@/types/menu'
 
@@ -15,27 +15,11 @@ export const useMenuStore = defineStore('menu', () => {
     activeMenuPath: [],
   })
 
-  // 从路由自动生成菜单
+  // 从菜单路由生成菜单
   const generateMenuFromRouter = () => {
-    const routes = router.getRoutes()
-    console.log('All routes:', routes)
+    console.log('Menu routes from modules folder:', menuRoutes)
     
-    // 过滤出需要显示在菜单中的路由
-    // 只处理顶级路由（有 children 的路由）
-    const menuRoutes = routes.filter(route => {
-      // 只处理有 meta.title 的路由，且不隐藏的路由
-      return route.meta?.title && 
-             !route.meta?.hideInMenu &&
-             route.path !== '/' && // 排除根路径
-             route.path !== '/login' && // 排除登录页
-             route.path !== '/coming-soon' && // 排除 coming soon 页面
-             !route.path.startsWith('/errors') && // 排除错误页面
-             route.children && route.children.length > 0 // 只处理有子路由的路由
-    })
-
-    console.log('Filtered menu routes:', menuRoutes)
-
-    // 直接使用过滤后的路由生成菜单
+    // 直接使用 modules 文件夹下的路由生成菜单
     state.value.menuItems = generateMenuFromRoutes(menuRoutes)
     console.log('Generated menu items:', state.value.menuItems)
   }

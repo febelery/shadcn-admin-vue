@@ -29,7 +29,7 @@ const props = defineProps<{
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
 
-      <!-- 有子项的菜单项 -->
+      <!-- 有子项的菜单项 - 递归渲染 -->
       <Collapsible
         v-else
         as-child
@@ -51,6 +51,7 @@ const props = defineProps<{
             </SidebarMenuSubButton>
           </CollapsibleTrigger>
           <CollapsibleContent>
+            <!-- 递归调用自身来渲染更深层的菜单 -->
             <NavMenuItems :items="item.items" />
           </CollapsibleContent>
         </SidebarMenuSubItem>

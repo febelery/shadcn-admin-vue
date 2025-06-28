@@ -4,13 +4,14 @@ import { Users, UserPlus, UserCheck, Shield } from 'lucide-vue-next'
 const users: RouteRecordRaw = {
   path: '/users',
   component: () => import('@/layout/app/AppSidebar.vue'),
-  redirect: '/users/list', // 重定向到默认子路由
+  redirect: '/users/list', // 直接重定向到默认子路由
   meta: {
     title: '用户',
     icon: Users,
     permission: 'users',
     order: 2,
     group: 'management',
+    isMenuRoot: true, // 明确标记为菜单根节点
   },
   children: [
     {
@@ -21,7 +22,6 @@ const users: RouteRecordRaw = {
         title: '用户列表',
         icon: Users,
         permission: 'users.view',
-        isDefault: true, // 标记为默认路由
       },
     },
     {

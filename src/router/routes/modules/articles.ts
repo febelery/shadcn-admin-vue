@@ -1,16 +1,17 @@
 import type { RouteRecordRaw } from 'vue-router'
-import { FileText, Edit3, Archive, Tags, FolderOpen, Newspaper } from 'lucide-vue-next'
+import { FileText, Edit3, Archive, Tags, FolderOpen, Newspaper, Clock, BookOpen } from 'lucide-vue-next'
 
 const articles: RouteRecordRaw = {
   path: '/articles',
   component: () => import('@/layout/app/AppSidebar.vue'),
-  redirect: '/articles/list', // 重定向到默认子路由
+  redirect: '/articles/list', // 直接重定向到默认子路由
   meta: {
     title: '文章',
     icon: FileText,
     permission: 'articles',
     order: 3,
     group: 'content',
+    isMenuRoot: true, // 明确标记为菜单根节点
   },
   children: [
     {
@@ -21,7 +22,7 @@ const articles: RouteRecordRaw = {
         title: '文章列表',
         icon: Newspaper,
         permission: 'articles.view',
-        isDefault: true, // 标记为默认路由
+        order: 1,
       },
     },
     {
@@ -32,7 +33,7 @@ const articles: RouteRecordRaw = {
         title: '写文章',
         icon: Edit3,
         permission: 'articles.create',
-        order: 1,
+        order: 2,
       },
     },
     {
@@ -43,7 +44,7 @@ const articles: RouteRecordRaw = {
         title: '分类管理',
         icon: FolderOpen,
         permission: 'articles.categories',
-        order: 2,
+        order: 3,
       },
     },
     {
@@ -54,19 +55,43 @@ const articles: RouteRecordRaw = {
         title: '标签管理',
         icon: Tags,
         permission: 'articles.tags',
-        order: 3,
+        order: 4,
       },
     },
     {
       path: 'archive',
       name: 'articles-archive',
-      component: () => import('@/views/coming-soon/index.vue'),
+      redirect: '/articles/archive/time', // 为有子路由的项目添加重定向
       meta: {
         title: '文章归档',
         icon: Archive,
         permission: 'articles.archive',
-        order: 4,
+        order: 5,
       },
+      children: [
+        {
+          path: 'time',
+          name: 'articles-archive-time',
+          component: () => import('@/views/coming-soon/index.vue'),
+          meta: {
+            title: '时间归档',
+            icon: Clock,
+            permission: 'articles.archive.time',
+            order: 1,
+          },
+        },
+        {
+          path: 'topic',
+          name: 'articles-archive-topic',
+          component: () => import('@/views/coming-soon/index.vue'),
+          meta: {
+            title: '主题归档',
+            icon: BookOpen,
+            permission: 'articles.archive.topic',
+            order: 2,
+          },
+        },
+      ],
     },
   ],
 }
