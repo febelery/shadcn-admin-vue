@@ -54,7 +54,7 @@
         :field-config="{
           username: {
             label: '用户名',
-            description: '请输入您的用户名或邮箱',
+            description: '请输入您的用户名',
             inputProps: {
               placeholder: '请输入用户名',
               class: 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
@@ -80,6 +80,16 @@
           </RainbowButton>
         </div>
       </AutoForm>
+
+      <!-- 测试账号提示 -->
+      <div class="mt-6 rounded-lg bg-gray-50 p-4">
+        <h4 class="text-sm font-medium text-gray-900 mb-2">测试账号</h4>
+        <div class="space-y-1 text-xs text-gray-600">
+          <div><strong>管理员:</strong> admin / asdfasdf</div>
+          <div><strong>编辑:</strong> editor / asdfasdf</div>
+          <div><strong>用户:</strong> user / asdfasdf</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -12,6 +12,7 @@ const router = useRouter()
 // 定义表单验证 schema
 const formSchema = z.object({
   name: z.string().min(2, '姓名至少需要2个字符').max(50, '姓名不能超过50个字符'),
+  username: z.string().min(2, '用户名至少需要2个字符').max(50, '用户名不能超过50个字符'),
   email: z.string().email('请输入有效的邮箱地址'),
   password: z.string()
     .min(8, '密码至少需要8个字符')
@@ -36,6 +37,7 @@ const handleSubmit = async (values: z.infer<typeof formSchema>) => {
   try {
     const createData: CreateUserParams = {
       name: values.name,
+      username: values.username,
       email: values.email,
       password: values.password,
       role: values.role,
@@ -90,9 +92,16 @@ const goBack = () => {
                     placeholder: '请输入姓名',
                   },
                 },
+                username: {
+                  label: '用户名',
+                  description: '用于登录的用户名，不能重复',
+                  inputProps: {
+                    placeholder: '请输入用户名',
+                  },
+                },
                 email: {
                   label: '邮箱',
-                  description: '用于登录和接收通知的邮箱地址',
+                  description: '用于接收通知的邮箱地址',
                   inputProps: {
                     placeholder: '请输入邮箱',
                     type: 'email',
@@ -152,11 +161,15 @@ const goBack = () => {
             <ul class="text-sm text-muted-foreground space-y-2">
               <li class="flex items-start gap-2">
                 <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <span>用户名用于登录，不能与其他用户重复</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
                 <span>密码至少8位字符，包含大小写字母和数字</span>
               </li>
               <li class="flex items-start gap-2">
                 <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-                <span>邮箱将用于登录和接收系统通知</span>
+                <span>邮箱将用于接收系统通知</span>
               </li>
               <li class="flex items-start gap-2">
                 <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>

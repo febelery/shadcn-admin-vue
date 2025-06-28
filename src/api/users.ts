@@ -4,6 +4,7 @@ import type { AxiosResponse } from 'axios'
 export interface User {
   id: number
   name: string
+  username: string
   email: string
   role: 'admin' | 'editor' | 'user'
   status: 'active' | 'inactive'
@@ -31,6 +32,7 @@ export interface UserListResponse {
 
 export interface CreateUserParams {
   name: string
+  username: string
   email: string
   password: string
   role: 'admin' | 'editor' | 'user'
@@ -43,7 +45,7 @@ export interface UpdateUserParams extends Partial<Omit<CreateUserParams, 'passwo
 }
 
 export interface LoginParams {
-  email: string
+  username: string
   password: string
   fingerprint?: string
 }

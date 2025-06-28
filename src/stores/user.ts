@@ -8,6 +8,7 @@ const USER_STORAGE_KEY = 'mkt-user'
 interface UserInfo {
   id: number
   name: string
+  username: string
   email: string
   role: string
   status: string
@@ -118,6 +119,7 @@ export const useUserStore = defineStore('user', {
         this.userInfo = {
           id: res.data.id,
           name: res.data.name,
+          username: res.data.username,
           email: res.data.email,
           role: res.data.role,
           status: res.data.status,
@@ -157,6 +159,7 @@ export const useUserStore = defineStore('user', {
       this.userInfo = {
         id: data.user.id,
         name: data.user.name,
+        username: data.user.username,
         email: data.user.email,
         role: data.user.role,
         status: data.user.status,

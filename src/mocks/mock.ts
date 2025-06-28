@@ -6,8 +6,9 @@ const mockUsers = [
   {
     id: 1,
     name: '超级管理员',
+    username: 'admin',
     email: 'admin@example.com',
-    password: 'admin123',
+    password: 'asdfasdf',
     role: 'admin',
     status: 'active',
     avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
@@ -52,8 +53,9 @@ const mockUsers = [
   {
     id: 2,
     name: '编辑用户',
+    username: 'editor',
     email: 'editor@example.com',
-    password: 'editor123',
+    password: 'asdfasdf',
     role: 'editor',
     status: 'active',
     avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
@@ -82,8 +84,9 @@ const mockUsers = [
   {
     id: 3,
     name: '普通用户',
+    username: 'user',
     email: 'user@example.com',
-    password: 'user123',
+    password: 'asdfasdf',
     role: 'user',
     status: 'active',
     avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
@@ -99,8 +102,9 @@ const mockUsers = [
   {
     id: 4,
     name: '受限编辑',
+    username: 'limited',
     email: 'limited@example.com',
-    password: 'limited123',
+    password: 'asdfasdf',
     role: 'editor',
     status: 'active',
     avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
@@ -117,8 +121,9 @@ const mockUsers = [
   {
     id: 5,
     name: '禁用用户',
+    username: 'disabled',
     email: 'disabled@example.com',
-    password: 'disabled123',
+    password: 'asdfasdf',
     role: 'user',
     status: 'inactive',
     avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
@@ -185,12 +190,13 @@ export function setupMock(axios: AxiosInstance) {
 
   // 登录接口
   mock.onPost('/auth/login').reply((config) => {
-    const { email, password } = JSON.parse(config.data)
+    const { username, password } = JSON.parse(config.data)
     
-    const user = mockUsers.find(u => u.email === email && u.password === password)
+    const user = mockUsers.find(u => u.username === username && u.password === password)
     
     if (!user) {
-      return [401, { message: '邮箱或密码错误' }]
+      // 账号密码错误返回 400 状态码
+      return [400, { message: '用户名或密码错误' }]
     }
 
     if (user.status === 'inactive') {
@@ -216,6 +222,7 @@ export function setupMock(axios: AxiosInstance) {
       user: {
         id: user.id,
         name: user.name,
+        username: user.username,
         email: user.email,
         role: user.role,
         status: user.status,
@@ -255,6 +262,7 @@ export function setupMock(axios: AxiosInstance) {
       user: {
         id: user.id,
         name: user.name,
+        username: user.username,
         email: user.email,
         role: user.role,
         status: user.status,
@@ -276,6 +284,7 @@ export function setupMock(axios: AxiosInstance) {
     return [200, {
       id: currentUser.id,
       name: currentUser.name,
+      username: currentUser.username,
       email: currentUser.email,
       role: currentUser.role,
       status: currentUser.status,
@@ -294,6 +303,7 @@ export function setupMock(axios: AxiosInstance) {
     let filteredUsers = mockUsers.map(user => ({
       id: user.id,
       name: user.name,
+      username: user.username,
       email: user.email,
       role: user.role,
       status: user.status,
@@ -307,7 +317,7 @@ export function setupMock(axios: AxiosInstance) {
     // 搜索过滤
     if (search) {
       filteredUsers = filteredUsers.filter(user => 
-        user.name.includes(search) || user.email.includes(search)
+        user.name.includes(search) || user.email.includes(search) || user.username.includes(search)
       )
     }
 
@@ -343,9 +353,15 @@ export function setupMock(axios: AxiosInstance) {
       return [400, { message: '邮箱已存在' }]
     }
 
+    // 检查用户名是否已存在
+    if (mockUsers.find(u => u.username === userData.username)) {
+      return [400, { message: '用户名已存在' }]
+    }
+
     const newUser = {
       id: Math.max(...mockUsers.map(u => u.id)) + 1,
       ...userData,
+      username: userData.username || userData.email.split('@')[0], // 如果没有用户名，使用邮箱前缀
       avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=1',
       permissions: getDefaultPermissions(userData.role),
       createdAt: new Date().toISOString(),
@@ -357,6 +373,7 @@ export function setupMock(axios: AxiosInstance) {
     return [200, {
       id: newUser.id,
       name: newUser.name,
+      username: newUser.username,
       email: newUser.email,
       role: newUser.role,
       status: newUser.status,

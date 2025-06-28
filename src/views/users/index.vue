@@ -189,6 +189,7 @@ const navigateToEdit = (id: number) => {
           <TableHeader>
             <TableRow>
               <TableHead>用户</TableHead>
+              <TableHead>用户名</TableHead>
               <TableHead>邮箱</TableHead>
               <TableHead>角色</TableHead>
               <TableHead>状态</TableHead>
@@ -209,6 +210,9 @@ const navigateToEdit = (id: number) => {
                     <div class="font-medium">{{ user.name }}</div>
                   </div>
                 </div>
+              </TableCell>
+              <TableCell>
+                <code class="text-sm bg-muted px-1.5 py-0.5 rounded">{{ user.username }}</code>
               </TableCell>
               <TableCell>{{ user.email }}</TableCell>
               <TableCell>
