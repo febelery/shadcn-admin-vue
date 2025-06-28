@@ -47,9 +47,20 @@ axios.interceptors.response.use(
 
     if (status === 401) {
       useUserStore().reset()
-      const redirect = encodeURIComponent(location.pathname + location.search)
+      
+      // 获取当前路径，避免redirect参数累加
+      const currentPath = window.location.pathname + window.location.search
+      const cleanPath = currentPath.split('?')[0] // 移除现有的查询参数
+      
+      // 只有在不是登录页面时才添加redirect参数
+      if (!cleanPath.includes('/login')) {
+        const redirect = encodeURIComponent(cleanPath)
+        window.location.href = `/login?redirect=${redirect}`
+      } else {
+        window.location.href = '/login'
+      }
+      
       const errData = error.response?.data as ErrorResponse
-      window.location.href = `/login?redirect=${redirect}`
       return Promise.reject(new Error(errData?.message || '未授权，请重新登录'))
     }
 

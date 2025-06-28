@@ -35,7 +35,7 @@
         <LoginForm :is-submitting="isSubmitting" @submit="handleLogin" />
       </template>
       <template v-else>
-        <OtpScan :otp-key="otpKey" @back="otpKey = ''" @success="loginSuccess" />
+        <OtpScan :otp-key="otpKey" @back="handleOtpBack" @success="loginSuccess" />
       </template>
     </Motion>
   </div>
@@ -107,7 +107,9 @@ const handleLogin = async (values: Record<string, any>) => {
       loginSuccess()
     }
   } catch (err: any) {
-    toast.error(err?.response?.data?.message || '登录失败', {
+    // 不要刷新页面，只显示错误信息
+    const errorMessage = err?.response?.data?.message || err?.data?.message || '登录失败'
+    toast.error(errorMessage, {
       position: 'top-center',
     })
   } finally {
@@ -115,15 +117,36 @@ const handleLogin = async (values: Record<string, any>) => {
   }
 }
 
+const handleOtpBack = () => {
+  otpKey.value = ''
+  // 重置提交状态
+  isSubmitting.value = false
+}
+
 const loginSuccess = () => {
   toast.success('登录成功')
   celebrate()
   
-  // 获取重定向地址或默认跳转到第一个有权限的路由
-  const redirect = route.query.redirect as string
+  // 获取重定向地址，确保不会有重复的redirect参数
+  let redirect = route.query.redirect as string
+  
   if (redirect) {
-    router.push(redirect)
+    // 解码重定向URL
+    try {
+      redirect = decodeURIComponent(redirect)
+      // 确保重定向URL不包含redirect参数，避免循环
+      if (redirect.includes('redirect=')) {
+        redirect = redirect.split('?')[0]
+      }
+      router.push(redirect)
+    } catch {
+      // 如果解码失败，跳转到默认路由
+      const permissions = userStore.userInfo?.permissions || []
+      const firstRoute = getFirstAccessibleRoute(permissions)
+      router.push(firstRoute)
+    }
   } else {
+    // 没有重定向地址，跳转到第一个有权限的路由
     const permissions = userStore.userInfo?.permissions || []
     const firstRoute = getFirstAccessibleRoute(permissions)
     router.push(firstRoute)

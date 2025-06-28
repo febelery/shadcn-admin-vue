@@ -44,6 +44,18 @@ function getFirstAccessibleRoute(permissions: string[]): string {
   return '/403'
 }
 
+// 清理重定向URL，移除已存在的redirect参数
+function cleanRedirectUrl(url: string): string {
+  try {
+    const urlObj = new URL(url, window.location.origin)
+    urlObj.searchParams.delete('redirect')
+    return urlObj.pathname + urlObj.search
+  } catch {
+    // 如果URL解析失败，直接返回路径部分
+    return url.split('?')[0]
+  }
+}
+
 export function setupRouterGuards(router: Router) {
   // 全局前置守卫
   router.beforeEach(async (to, from, next) => {
@@ -68,7 +80,9 @@ export function setupRouterGuards(router: Router) {
 
     // 检查是否已登录
     if (!userStore.isLoggedIn) {
-      next(`/login?redirect=${encodeURIComponent(to.fullPath)}`)
+      // 清理重定向URL，避免参数累加
+      const cleanUrl = cleanRedirectUrl(to.fullPath)
+      next(`/login?redirect=${encodeURIComponent(cleanUrl)}`)
       return
     }
 
@@ -77,7 +91,9 @@ export function setupRouterGuards(router: Router) {
       try {
         await userStore.getUserInfo()
       } catch (error) {
-        next('/login')
+        // 清理重定向URL
+        const cleanUrl = cleanRedirectUrl(to.fullPath)
+        next(`/login?redirect=${encodeURIComponent(cleanUrl)}`)
         return
       }
     }
