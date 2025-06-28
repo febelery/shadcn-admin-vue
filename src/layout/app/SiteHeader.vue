@@ -2,6 +2,7 @@
 import { ArrowLeft } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useSiteHeader } from '@/composables/useSiteHeader'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import SearchForm from './SearchForm.vue'
 
 const router = useRouter()
@@ -66,8 +67,14 @@ const goBack = () => {
         />
       </div>
 
-      <!-- 搜索表单 -->
-      <SearchForm class="w-full sm:ml-auto sm:w-auto" />
+      <!-- 右侧工具栏 -->
+      <div class="ml-auto flex items-center gap-2">
+        <!-- 搜索表单 -->
+        <SearchForm class="w-full sm:w-auto" />
+        
+        <!-- 主题切换按钮 -->
+        <ThemeToggle />
+      </div>
     </div>
   </header>
 </template>

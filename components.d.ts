@@ -167,6 +167,7 @@ declare module 'vue' {
     TabsList: typeof import('./src/components/ui/tabs/TabsList.vue')['default']
     TabsTrigger: typeof import('./src/components/ui/tabs/TabsTrigger.vue')['default']
     Textarea: typeof import('./src/components/ui/textarea/Textarea.vue')['default']
+    ThemeToggle: typeof import('./src/components/ui/theme-toggle/ThemeToggle.vue')['default']
     Toggle: typeof import('./src/components/ui/toggle/Toggle.vue')['default']
     ToggleGroup: typeof import('./src/components/ui/toggle-group/ToggleGroup.vue')['default']
     ToggleGroupItem: typeof import('./src/components/ui/toggle-group/ToggleGroupItem.vue')['default']
