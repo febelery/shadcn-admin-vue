@@ -282,26 +282,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* 自定义滚动条样式 - 适配 dark 模式 */
-.overflow-auto::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.overflow-auto::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-  border-radius: 4px;
-}
-
-.overflow-auto::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 4px;
-}
-
-.overflow-auto::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
-}
-
 /* 文档预览容器样式 */
 .docx-preview-container {
   transition: transform 0.2s ease;

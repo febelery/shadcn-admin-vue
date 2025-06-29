@@ -183,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { useClipboard } from '@vueuse/core'
+import { useClipboard, useScrollLock } from '@vueuse/core'
 import {
   Check,
   ChevronLeft,
@@ -234,6 +234,9 @@ const emit = defineEmits<{
 
 const { copy, copied } = useClipboard({ copiedDuring: 2000 })
 const showCopiedToast = ref(false)
+
+// 使用 VueUse 的 useScrollLock 来锁定页面滚动
+const isLocked = useScrollLock(document.body)
 
 const previewRef = ref<HTMLElement | null>(null)
 const zoom = ref(1)
@@ -388,33 +391,35 @@ onMounted(() => {
     previewRef.value?.focus()
   })
 
-  // 恢复滚动
-  onBeforeUnmount(() => {
-    document.documentElement.style.overflow = ''
-  })
-
   if ((currentFile.value?.size || 0) > 0) {
     showInfo.value = true
   }
 })
+
+// 清理函数 - 确保在组件卸载时解除滚动锁定
+onBeforeUnmount(() => {
+  isLocked.value = false
+})
+
+// 当预览打开/关闭时，控制滚动锁定
+watch(
+  () => props.isOpen,
+  (open) => {
+    isLocked.value = open
+    if (open) {
+      nextTick(() => {
+        previewRef.value?.focus()
+      })
+    }
+  },
+  { immediate: true }
+)
 
 // 当文件改变时重置视图
 watch(
   () => props.currentIndex,
   () => {
     resetView()
-  }
-)
-
-// 元素自动获得焦点
-watch(
-  () => props.isOpen,
-  (open) => {
-    if (open) {
-      nextTick(() => {
-        previewRef.value?.focus()
-      })
-    }
   }
 )
 </script>
