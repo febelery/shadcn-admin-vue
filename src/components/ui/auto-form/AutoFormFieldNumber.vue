@@ -9,24 +9,48 @@ defineOptions({
   inheritAttrs: false,
 })
 
-defineProps<FieldProps>()
+const props = defineProps<FieldProps & {
+  shouldShowError?: (meta: any) => boolean
+  shouldValidateOnInput?: (meta: any) => boolean
+}>()
+
+// 默认的错误显示逻辑
+const defaultShouldShowError = (meta: any) => meta.touched && !meta.valid
+const shouldShowError = props.shouldShowError || defaultShouldShowError
 </script>
 
 <template>
   <FormField v-slot="slotProps" :name="fieldName">
-    <FormItem>
-      <AutoFormLabel v-if="!config?.hideLabel" :required="required">
+    <FormItem :data-field="fieldName">
+      <AutoFormLabel 
+        v-if="!config?.hideLabel" 
+        :required="required"
+        :should-show-error="shouldShowError(slotProps.meta)"
+        :for="fieldName"
+      >
         {{ config?.label || beautifyObjectName(label ?? fieldName) }}
       </AutoFormLabel>
       <FormControl>
         <slot v-bind="slotProps">
-          <Input type="number" v-bind="{ ...slotProps.componentField, ...config?.inputProps }" :disabled="config?.inputProps?.disabled ?? disabled" />
+          <Input 
+            :id="fieldName"
+            :name="fieldName"
+            type="number" 
+            v-bind="{ 
+              ...slotProps.componentField, 
+              ...config?.inputProps,
+            }" 
+            :disabled="config?.inputProps?.disabled ?? disabled"
+            :aria-invalid="shouldShowError(slotProps.meta) ? 'true' : 'false'"
+            @blur="slotProps.handleBlur"
+          />
         </slot>
       </FormControl>
       <FormDescription v-if="config?.description">
         {{ config.description }}
       </FormDescription>
-      <FormMessage />
+      <!-- 使用智能错误显示逻辑 -->
+      <FormMessage v-if="shouldShowError(slotProps.meta)" />
     </FormItem>
   </FormField>
 </template>

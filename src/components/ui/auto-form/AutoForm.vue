@@ -4,10 +4,11 @@ import type { z, ZodAny } from 'zod'
 import type { Config, ConfigItem, Dependency, Shape } from './interface'
 import { Form } from '@/components/ui/form'
 import { toTypedSchema } from '@vee-validate/zod'
-import { computed, toRefs } from 'vue'
+import { computed, toRefs, onMounted, nextTick } from 'vue'
 import AutoFormField from './AutoFormField.vue'
 import { provideDependencies } from './dependencies'
 import { getBaseSchema, getBaseType, getDefaultValueInZodStack, getObjectFormSchema, type ZodObjectOrWrapped } from './utils'
+import { configure } from 'vee-validate'
 
 const props = defineProps<{
   schema: T
@@ -19,6 +20,17 @@ const props = defineProps<{
 const emits = defineEmits<{
   submit: [event: z.infer<T>]
 }>()
+
+// 在组件内部配置验证时机
+onMounted(() => {
+  configure({
+    validateOnBlur: true,      // 失焦时验证
+    validateOnChange: false,   // 输入时不验证（避免干扰用户）
+    validateOnInput: false,    // 输入时不验证
+    validateOnModelUpdate: true, // 当字段已被触摸过且有错误时，输入时实时验证
+    bails: false, // 不在第一个错误时停止验证
+  })
+})
 
 const { dependencies } = toRefs(props)
 provideDependencies(dependencies)
@@ -60,11 +72,59 @@ const fields = computed(() => {
   return val
 })
 
+// 滚动到第一个错误字段的函数
+const scrollToFirstError = async (errors: Record<string, any>) => {
+  await nextTick()
+  
+  // 获取所有错误字段名
+  const errorFields = Object.keys(errors)
+  if (errorFields.length === 0) return
+
+  // 按照字段在表单中的顺序排序
+  const fieldOrder = Object.keys(shapes.value)
+  const sortedErrorFields = errorFields.sort((a, b) => {
+    const indexA = fieldOrder.indexOf(a)
+    const indexB = fieldOrder.indexOf(b)
+    return indexA - indexB
+  })
+
+  const firstErrorField = sortedErrorFields[0]
+  
+  // 查找对应的 DOM 元素
+  const errorElement = document.querySelector(`[name="${firstErrorField}"]`) ||
+                      document.querySelector(`[data-field="${firstErrorField}"]`) ||
+                      document.querySelector(`#${firstErrorField}`) ||
+                      document.querySelector(`[for="${firstErrorField}"]`)?.closest('[data-slot="form-item"]')
+
+  if (errorElement) {
+    // 滚动到错误元素
+    errorElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest'
+    })
+
+    // 聚焦到输入元素（如果可聚焦）
+    const focusableElement = errorElement.matches('input, textarea, select, button') 
+      ? errorElement as HTMLElement
+      : errorElement.querySelector('input, textarea, select, button') as HTMLElement
+
+    if (focusableElement && typeof focusableElement.focus === 'function') {
+      setTimeout(() => {
+        focusableElement.focus()
+      }, 300) // 等待滚动动画完成
+    }
+  }
+}
+
 const formComponent = computed(() => props.form ? 'form' : Form)
 const formComponentProps = computed(() => {
   if (props.form) {
     return {
-      onSubmit: props.form.handleSubmit(val => emits('submit', val)),
+      onSubmit: props.form.handleSubmit(
+        (val) => emits('submit', val),
+        (errors) => scrollToFirstError(errors)
+      ),
     };
   }
   else {
@@ -73,6 +133,7 @@ const formComponentProps = computed(() => {
       keepValues: true,
       validationSchema: formSchema,
       onSubmit: (val: GenericObject) => emits('submit', val),
+      onInvalidSubmit: (errors: any) => scrollToFirstError(errors.errors),
     };
   }
 })

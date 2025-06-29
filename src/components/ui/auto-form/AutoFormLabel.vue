@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { FormLabel } from '@/components/ui/form'
 
-defineProps<{
+const props = defineProps<{
   required?: boolean
+  shouldShowError?: boolean
 }>()
 </script>
 
 <template>
-  <FormLabel>
+  <FormLabel :data-error="shouldShowError">
     <slot />
     <span v-if="required" class="text-destructive"> *</span>
   </FormLabel>

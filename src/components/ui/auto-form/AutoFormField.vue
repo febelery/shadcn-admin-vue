@@ -22,6 +22,16 @@ const delegatedProps = computed(() => {
 })
 
 const { isDisabled, isHidden, isRequired, overrideOptions } = useDependencies(props.fieldName)
+
+// 智能验证逻辑：检查是否应该显示错误状态
+const shouldShowError = (meta: any) => {
+  return meta.touched && !meta.valid
+}
+
+// 智能验证逻辑：检查是否应该实时验证
+const shouldValidateOnInput = (meta: any) => {
+  return meta.touched && meta.valid === false
+}
 </script>
 
 <template>
@@ -38,6 +48,9 @@ const { isDisabled, isHidden, isRequired, overrideOptions } = useDependencies(pr
     :options="overrideOptions || shape.options"
     :disabled="isDisabled"
     :config="config"
+    :should-show-error="shouldShowError"
+    :should-validate-on-input="shouldValidateOnInput"
+    :data-field="fieldName"
     v-bind="delegatedProps"
   >
     <slot />
