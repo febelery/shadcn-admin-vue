@@ -97,6 +97,7 @@ declare module 'vue' {
     Motion: typeof import('motion-v')['Motion']
     NavMenuItem: typeof import('./src/components/nav/NavMenuItem.vue')['default']
     NavProjects: typeof import('./src/components/NavProjects.vue')['default']
+    PdfPreview: typeof import('./src/components/file-preview/PdfPreview.vue')['default']
     Popover: typeof import('./src/components/ui/popover/Popover.vue')['default']
     PopoverAnchor: typeof import('./src/components/ui/popover/PopoverAnchor.vue')['default']
     PopoverContent: typeof import('./src/components/ui/popover/PopoverContent.vue')['default']

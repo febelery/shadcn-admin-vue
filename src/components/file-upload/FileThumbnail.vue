@@ -136,13 +136,8 @@
           <!-- 文件图标容器 - 更大更美观 -->
           <div class="relative mb-2 sm:mb-3">
             <!-- 背景装饰 -->
-            <div
-              :class="[
-                'absolute inset-0 rounded-2xl opacity-20 blur-sm',
-                fileTypeConfig.bg,
-              ]"
-            ></div>
-            
+            <div :class="['absolute inset-0 rounded-2xl opacity-20 blur-sm', fileTypeConfig.bg]"></div>
+
             <!-- 主图标容器 -->
             <div
               :class="[
@@ -152,12 +147,12 @@
               ]"
             >
               <component :is="fileTypeConfig.icon" :class="['size-6 sm:size-8', fileTypeConfig.iconColor]" />
-              
+
               <!-- 文件类型标识 -->
               <div
-                class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md dark:bg-neutral-800 sm:h-6 sm:w-6"
+                class="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md sm:h-6 sm:w-6 dark:bg-neutral-800"
               >
-                <span class="text-xs font-bold text-gray-600 dark:text-gray-300 sm:text-sm">
+                <span class="text-xs font-bold text-gray-600 sm:text-sm dark:text-gray-300">
                   {{ getFileExtension(file.name).charAt(0) }}
                 </span>
               </div>
@@ -167,11 +162,7 @@
           <!-- 文件扩展名 -->
           <div
             class="rounded-md px-2 py-1 text-center"
-            :class="[
-              'text-xs font-semibold sm:text-sm',
-              fileTypeConfig.textColor,
-              fileTypeConfig.bgLight,
-            ]"
+            :class="['text-xs font-semibold sm:text-sm', fileTypeConfig.textColor, fileTypeConfig.bgLight]"
           >
             {{ getFileExtension(file.name) }}
           </div>
@@ -380,10 +371,10 @@ const fileTypeConfig = computed(() => {
 
   // 图片类型
   if (type.startsWith('image/')) return fileTypeColors.image
-  
+
   // 视频类型
   if (type.startsWith('video/')) return fileTypeColors.video
-  
+
   // 音频类型
   if (type.startsWith('audio/')) return fileTypeColors.audio
 
@@ -393,19 +384,19 @@ const fileTypeConfig = computed(() => {
   }
 
   // 表格类型
-  if (type.includes('excel') || type.includes('spreadsheet') || 
-      ['xls', 'xlsx', 'csv'].includes(extension)) {
+  if (type.includes('excel') || type.includes('spreadsheet') || ['xls', 'xlsx', 'csv'].includes(extension)) {
     return fileTypeColors.spreadsheet
   }
 
   // 演示文稿类型
-  if (type.includes('powerpoint') || type.includes('presentation') || 
-      ['ppt', 'pptx'].includes(extension)) {
+  if (type.includes('powerpoint') || type.includes('presentation') || ['ppt', 'pptx'].includes(extension)) {
     return fileTypeColors.presentation
   }
 
   // 代码文件
-  if (['js', 'ts', 'jsx', 'tsx', 'vue', 'html', 'css', 'scss', 'json', 'xml', 'yaml', 'yml', 'md'].includes(extension)) {
+  if (
+    ['js', 'ts', 'jsx', 'tsx', 'vue', 'html', 'css', 'scss', 'json', 'xml', 'yaml', 'yml', 'md'].includes(extension)
+  ) {
     return fileTypeColors.code
   }
 

@@ -83,9 +83,9 @@
 <script lang="ts" setup>
 import { Motion } from 'motion-v'
 import type { HTMLAttributes } from 'vue'
-import { ref, watch, computed } from 'vue'
-import { cn } from '@/lib/utils'
+import { computed, ref, watch } from 'vue'
 import { FilePreview, type FilePreviewItem } from '@/components/file-preview'
+import { cn } from '@/lib/utils'
 import FileThumbnail from './FileThumbnail.vue'
 import FileUploadZone from './FileUploadZone.vue'
 import { formatAcceptedTypes } from './fileUtils'
@@ -159,9 +159,9 @@ const {
 
 // 为预览组件准备数据
 const previewFiles = computed((): FilePreviewItem[] => {
-  return files.value.map(file => ({
+  return files.value.map((file) => ({
     file,
-    url: getFilePreview(file)
+    url: getFilePreview(file),
   }))
 })
 

@@ -38,13 +38,27 @@
         </div>
 
         <!-- Excel 预览 -->
-        <div v-else-if="currentFile && isExcelFile(currentFile)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
+        <div
+          v-else-if="currentFile && isExcelFile(currentFile)"
+          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center"
+        >
           <ExcelPreview :file="currentFile" :file-url="currentFileUrl" />
         </div>
 
         <!-- Word 文档预览 -->
-        <div v-else-if="currentFile && isWordFile(currentFile)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
+        <div
+          v-else-if="currentFile && isWordFile(currentFile)"
+          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center"
+        >
           <DocxPreview :file="currentFile" :file-url="currentFileUrl" />
+        </div>
+
+        <!-- PDF 文档预览 -->
+        <div
+          v-else-if="currentFile && isPdfFile(currentFile)"
+          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center"
+        >
+          <PdfPreview :file="currentFile" :file-url="currentFileUrl" />
         </div>
 
         <!-- 非可预览文件 -->
@@ -189,10 +203,11 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-vue-next'
-import { nextTick, onBeforeUnmount, onMounted, ref, watch, computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import DocxPreview from './DocxPreview.vue'
 import ExcelPreview from './ExcelPreview.vue'
-import { formatFileSize, isExcelFile, isImageFile, isVideoFile, isWordFile } from './fileUtils'
+import PdfPreview from './PdfPreview.vue'
+import { formatFileSize, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile } from './fileUtils'
 
 export interface FilePreviewItem {
   file: File

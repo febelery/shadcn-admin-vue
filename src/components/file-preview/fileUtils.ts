@@ -21,10 +21,7 @@ export function isExcelFile(file: File): boolean {
 }
 
 export function isWordFile(file: File): boolean {
-  const wordTypes = [
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  ]
+  const wordTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
   return wordTypes.includes(file.type) || file.name.match(/\.docx?$/i) !== null
 }
 
@@ -57,7 +54,7 @@ export function getFileExtension(filename: string): string {
 // 根据文件名猜测文件类型
 export function guessFileType(filename: string): string {
   const extension = filename.split('.').pop()?.toLowerCase()
-  
+
   const typeMap: Record<string, string> = {
     // 图片
     jpg: 'image/jpeg',
@@ -68,7 +65,7 @@ export function guessFileType(filename: string): string {
     svg: 'image/svg+xml',
     bmp: 'image/bmp',
     ico: 'image/x-icon',
-    
+
     // 视频
     mp4: 'video/mp4',
     avi: 'video/x-msvideo',
@@ -77,14 +74,14 @@ export function guessFileType(filename: string): string {
     flv: 'video/x-flv',
     webm: 'video/webm',
     mkv: 'video/x-matroska',
-    
+
     // 音频
     mp3: 'audio/mpeg',
     wav: 'audio/wav',
     ogg: 'audio/ogg',
     aac: 'audio/aac',
     flac: 'audio/flac',
-    
+
     // 文档
     pdf: 'application/pdf',
     doc: 'application/msword',
@@ -93,7 +90,7 @@ export function guessFileType(filename: string): string {
     xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ppt: 'application/vnd.ms-powerpoint',
     pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    
+
     // 文本
     txt: 'text/plain',
     html: 'text/html',
@@ -102,7 +99,7 @@ export function guessFileType(filename: string): string {
     json: 'application/json',
     xml: 'text/xml',
     csv: 'text/csv',
-    
+
     // 压缩文件
     zip: 'application/zip',
     rar: 'application/x-rar-compressed',
@@ -110,7 +107,7 @@ export function guessFileType(filename: string): string {
     tar: 'application/x-tar',
     gz: 'application/gzip',
   }
-  
+
   return typeMap[extension || ''] || 'application/octet-stream'
 }
 
@@ -135,6 +132,6 @@ export function getFileTypeName(file: File): string {
   if (isWordFile(file)) return 'Word文档'
   if (isPdfFile(file)) return 'PDF文档'
   if (isTextFile(file)) return '文本文件'
-  
+
   return '文件'
 }
