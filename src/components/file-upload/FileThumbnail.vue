@@ -131,22 +131,55 @@
           </div>
         </div>
 
-        <!-- 非图片/视频文件图标 -->
-        <div v-else class="flex flex-col items-center justify-center p-2 sm:p-4">
+        <!-- 非图片/视频文件图标 - 优化设计 -->
+        <div v-else class="flex h-full w-full flex-col items-center justify-center p-2 sm:p-4">
+          <!-- 文件图标容器 - 更大更美观 -->
+          <div class="relative mb-2 sm:mb-3">
+            <!-- 背景装饰 -->
+            <div
+              :class="[
+                'absolute inset-0 rounded-2xl opacity-20 blur-sm',
+                fileTypeConfig.bg,
+              ]"
+            ></div>
+            
+            <!-- 主图标容器 -->
+            <div
+              :class="[
+                'relative flex items-center justify-center rounded-2xl shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl',
+                'h-12 w-12 sm:h-16 sm:w-16',
+                fileTypeConfig.bg,
+              ]"
+            >
+              <component :is="fileTypeConfig.icon" :class="['size-6 sm:size-8', fileTypeConfig.iconColor]" />
+              
+              <!-- 文件类型标识 -->
+              <div
+                class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md dark:bg-neutral-800 sm:h-6 sm:w-6"
+              >
+                <span class="text-xs font-bold text-gray-600 dark:text-gray-300 sm:text-sm">
+                  {{ getFileExtension(file.name).charAt(0) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 文件扩展名 -->
           <div
+            class="rounded-md px-2 py-1 text-center"
             :class="[
-              'flex h-10 w-10 items-center justify-center rounded-full shadow-md sm:h-16 sm:w-16',
-              fileTypeConfig.bg,
-              'transform transition-transform duration-300 group-hover:scale-105',
+              'text-xs font-semibold sm:text-sm',
+              fileTypeConfig.textColor,
+              fileTypeConfig.bgLight,
             ]"
           >
-            <component :is="fileTypeConfig.icon" :class="['size-4 sm:size-7', fileTypeConfig.iconColor]" />
-          </div>
-          <p
-            class="mt-1 max-w-full truncate text-center text-xs font-medium text-neutral-600 sm:mt-3 dark:text-neutral-400"
-          >
             {{ getFileExtension(file.name) }}
-          </p>
+          </div>
+
+          <!-- 文件大小 -->
+          <div class="mt-1 text-center text-xs text-gray-500 dark:text-gray-400">
+            {{ formatFileSize(file.size) }}
+          </div>
         </div>
       </div>
     </div>
@@ -156,9 +189,16 @@
 <script setup lang="ts">
 import {
   AlertTriangle,
+  Archive,
   CheckCircle,
+  Code,
+  Database,
   File,
+  FileAudio,
+  FileImage,
+  FileSpreadsheet,
   FileText,
+  FileVideo,
   Image as ImageIcon,
   Music,
   PlayIcon,
@@ -206,32 +246,86 @@ function generateFileId(file: File): string {
   return `${file.name}-${file.size}-${file.lastModified}`
 }
 
-// 文件类型颜色映射
+// 格式化文件大小
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
+// 文件类型颜色映射 - 更丰富的配置
 const fileTypeColors = {
   image: {
-    icon: ImageIcon,
+    icon: FileImage,
     bg: 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40',
+    bgLight: 'bg-purple-50 dark:bg-purple-900/20',
     iconColor: 'text-purple-600 dark:text-purple-400',
+    textColor: 'text-purple-700 dark:text-purple-300',
   },
   video: {
-    icon: Video,
+    icon: FileVideo,
     bg: 'bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40',
+    bgLight: 'bg-blue-50 dark:bg-blue-900/20',
     iconColor: 'text-blue-600 dark:text-blue-400',
+    textColor: 'text-blue-700 dark:text-blue-300',
   },
   audio: {
-    icon: Music,
+    icon: FileAudio,
     bg: 'bg-gradient-to-br from-green-100 to-teal-100 dark:from-green-900/40 dark:to-teal-900/40',
+    bgLight: 'bg-green-50 dark:bg-green-900/20',
     iconColor: 'text-green-600 dark:text-green-400',
+    textColor: 'text-green-700 dark:text-green-300',
   },
-  text: {
+  document: {
     icon: FileText,
-    bg: 'bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40',
-    iconColor: 'text-amber-600 dark:text-amber-400',
+    bg: 'bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40',
+    bgLight: 'bg-blue-50 dark:bg-blue-900/20',
+    iconColor: 'text-blue-600 dark:text-blue-400',
+    textColor: 'text-blue-700 dark:text-blue-300',
+  },
+  spreadsheet: {
+    icon: FileSpreadsheet,
+    bg: 'bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40',
+    bgLight: 'bg-emerald-50 dark:bg-emerald-900/20',
+    iconColor: 'text-emerald-600 dark:text-emerald-400',
+    textColor: 'text-emerald-700 dark:text-emerald-300',
+  },
+  presentation: {
+    icon: FileText,
+    bg: 'bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/40',
+    bgLight: 'bg-orange-50 dark:bg-orange-900/20',
+    iconColor: 'text-orange-600 dark:text-orange-400',
+    textColor: 'text-orange-700 dark:text-orange-300',
+  },
+  code: {
+    icon: Code,
+    bg: 'bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-800/60 dark:to-slate-800/60',
+    bgLight: 'bg-gray-50 dark:bg-gray-800/20',
+    iconColor: 'text-gray-600 dark:text-gray-400',
+    textColor: 'text-gray-700 dark:text-gray-300',
+  },
+  archive: {
+    icon: Archive,
+    bg: 'bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/40',
+    bgLight: 'bg-yellow-50 dark:bg-yellow-900/20',
+    iconColor: 'text-yellow-600 dark:text-yellow-400',
+    textColor: 'text-yellow-700 dark:text-yellow-300',
+  },
+  database: {
+    icon: Database,
+    bg: 'bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40',
+    bgLight: 'bg-indigo-50 dark:bg-indigo-900/20',
+    iconColor: 'text-indigo-600 dark:text-indigo-400',
+    textColor: 'text-indigo-700 dark:text-indigo-300',
   },
   default: {
     icon: File,
     bg: 'bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-800/60 dark:to-slate-800/60',
+    bgLight: 'bg-gray-50 dark:bg-gray-800/20',
     iconColor: 'text-gray-600 dark:text-gray-400',
+    textColor: 'text-gray-700 dark:text-gray-300',
   },
 }
 
@@ -282,11 +376,71 @@ watch(
 // 获取文件类型配置
 const fileTypeConfig = computed(() => {
   const type = props.file.type
+  const extension = getFileExtension(props.file.name).toLowerCase()
 
+  // 图片类型
   if (type.startsWith('image/')) return fileTypeColors.image
+  
+  // 视频类型
   if (type.startsWith('video/')) return fileTypeColors.video
+  
+  // 音频类型
   if (type.startsWith('audio/')) return fileTypeColors.audio
-  if (type.startsWith('text/')) return fileTypeColors.text
+
+  // 文档类型
+  if (type.includes('word') || extension === 'doc' || extension === 'docx') {
+    return fileTypeColors.document
+  }
+
+  // 表格类型
+  if (type.includes('excel') || type.includes('spreadsheet') || 
+      ['xls', 'xlsx', 'csv'].includes(extension)) {
+    return fileTypeColors.spreadsheet
+  }
+
+  // 演示文稿类型
+  if (type.includes('powerpoint') || type.includes('presentation') || 
+      ['ppt', 'pptx'].includes(extension)) {
+    return fileTypeColors.presentation
+  }
+
+  // 代码文件
+  if (['js', 'ts', 'jsx', 'tsx', 'vue', 'html', 'css', 'scss', 'json', 'xml', 'yaml', 'yml', 'md'].includes(extension)) {
+    return fileTypeColors.code
+  }
+
+  // 压缩文件
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(extension)) {
+    return fileTypeColors.archive
+  }
+
+  // 数据库文件
+  if (['sql', 'db', 'sqlite', 'mdb'].includes(extension)) {
+    return fileTypeColors.database
+  }
+
+  // PDF
+  if (type === 'application/pdf' || extension === 'pdf') {
+    return {
+      icon: FileText,
+      bg: 'bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/40 dark:to-pink-900/40',
+      bgLight: 'bg-red-50 dark:bg-red-900/20',
+      iconColor: 'text-red-600 dark:text-red-400',
+      textColor: 'text-red-700 dark:text-red-300',
+    }
+  }
+
+  // 文本文件
+  if (type.startsWith('text/') || ['txt', 'rtf'].includes(extension)) {
+    return {
+      icon: FileText,
+      bg: 'bg-gradient-to-br from-slate-100 to-gray-100 dark:from-slate-800/60 dark:to-gray-800/60',
+      bgLight: 'bg-slate-50 dark:bg-slate-800/20',
+      iconColor: 'text-slate-600 dark:text-slate-400',
+      textColor: 'text-slate-700 dark:text-slate-300',
+    }
+  }
+
   return fileTypeColors.default
 })
 </script>
