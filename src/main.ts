@@ -1,12 +1,16 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
+import { createPinia } from 'pinia'
+import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
-import './assets/main.css'
 import './api/interceptor'
+import './assets/main.css'
+import { setupGlobalZodMessages } from './lib/zod-messages'
+import router from './router'
 
 const app = createApp(App)
+
+// 设置全局 Zod 错误消息
+setupGlobalZodMessages()
 
 // 创建 Query Client
 const queryClient = new QueryClient({
