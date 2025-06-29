@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Calendar, Edit, Eye, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { deleteArticleApi, getArticlesApi } from '@/api/articles'
 import type { Article, ArticleListParams } from '@/api/articles'
+
+const router = useRouter()
 
 // 响应式数据
 const articles = ref<Article[]>([])
@@ -133,6 +136,16 @@ const getCategoryText = (category: string) => {
       return category
   }
 }
+
+// 导航到编辑页面
+const navigateToEdit = (id: number) => {
+  router.push(`/articles/edit/${id}`)
+}
+
+// 导航到创建页面
+const navigateToCreate = () => {
+  router.push('/articles/create')
+}
 </script>
 
 <template>
@@ -143,11 +156,9 @@ const getCategoryText = (category: string) => {
         <h1 class="text-2xl font-bold tracking-tight">文章管理</h1>
         <p class="text-muted-foreground">管理系统中的所有文章内容</p>
       </div>
-      <Button as-child>
-        <router-link to="/articles/create">
-          <Plus class="mr-2 h-4 w-4" />
-          写文章
-        </router-link>
+      <Button @click="navigateToCreate">
+        <Plus class="mr-2 h-4 w-4" />
+        写文章
       </Button>
     </div>
 
@@ -218,7 +229,7 @@ const getCategoryText = (category: string) => {
                   <Eye class="mr-2 h-4 w-4" />
                   查看
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem @click="navigateToEdit(article.id)">
                   <Edit class="mr-2 h-4 w-4" />
                   编辑
                 </DropdownMenuItem>

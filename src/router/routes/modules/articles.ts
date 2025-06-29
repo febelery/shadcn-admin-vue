@@ -37,6 +37,16 @@ const articles: RouteRecordRaw = {
       },
     },
     {
+      path: 'edit/:id',
+      name: 'articles-edit',
+      component: () => import('@/views/articles/edit.vue'),
+      meta: {
+        title: '编辑文章',
+        permission: 'articles.edit',
+        hideInMenu: true, // 编辑页面不在菜单中显示
+      },
+    },
+    {
       path: 'categories',
       name: 'articles-categories',
       component: () => import('@/views/coming-soon/index.vue'),

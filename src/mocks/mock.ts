@@ -367,6 +367,33 @@ export function setupMock(axios: AxiosInstance) {
     ]
   })
 
+  // 获取用户详情
+  mock.onGet(/\/users\/\d+/).reply((config) => {
+    const id = parseInt(config.url!.split('/').pop()!)
+    const user = mockUsers.find((u) => u.id === id)
+
+    if (!user) {
+      return [404, { message: '用户不存在' }]
+    }
+
+    return [
+      200,
+      {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        avatar: user.avatar,
+        permissions: user.permissions,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        lastLoginAt: user.lastLoginAt,
+      },
+    ]
+  })
+
   // 创建用户接口
   mock.onPost('/users').reply((config) => {
     const userData = JSON.parse(config.data)
@@ -407,6 +434,68 @@ export function setupMock(axios: AxiosInstance) {
         permissions: newUser.permissions,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
+      },
+    ]
+  })
+
+  // 更新用户接口
+  mock.onPut(/\/users\/\d+/).reply((config) => {
+    const id = parseInt(config.url!.split('/').pop()!)
+    const updateData = JSON.parse(config.data)
+    const userIndex = mockUsers.findIndex((u) => u.id === id)
+
+    if (userIndex === -1) {
+      return [404, { message: '用户不存在' }]
+    }
+
+    const user = mockUsers[userIndex]
+
+    // 检查邮箱是否已被其他用户使用
+    if (updateData.email && updateData.email !== user.email) {
+      const existingUser = mockUsers.find((u) => u.email === updateData.email && u.id !== id)
+      if (existingUser) {
+        return [400, { message: '邮箱已被其他用户使用' }]
+      }
+    }
+
+    // 检查用户名是否已被其他用户使用
+    if (updateData.username && updateData.username !== user.username) {
+      const existingUser = mockUsers.find((u) => u.username === updateData.username && u.id !== id)
+      if (existingUser) {
+        return [400, { message: '用户名已被其他用户使用' }]
+      }
+    }
+
+    // 更新用户信息
+    const updatedUser = {
+      ...user,
+      ...updateData,
+      id: user.id, // 确保 ID 不被修改
+      updatedAt: new Date().toISOString(),
+      permissions: updateData.role ? getDefaultPermissions(updateData.role) : user.permissions,
+    }
+
+    // 如果没有提供密码，保持原密码
+    if (!updateData.password) {
+      updatedUser.password = user.password
+    }
+
+    mockUsers[userIndex] = updatedUser
+
+    return [
+      200,
+      {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        status: updatedUser.status,
+        avatar: updatedUser.avatar,
+        permissions: updatedUser.permissions,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
+        lastLoginAt: updatedUser.lastLoginAt,
       },
     ]
   })
@@ -455,6 +544,18 @@ export function setupMock(axios: AxiosInstance) {
     ]
   })
 
+  // 获取文章详情
+  mock.onGet(/\/articles\/\d+/).reply((config) => {
+    const id = parseInt(config.url!.split('/').pop()!)
+    const article = mockArticles.find((a) => a.id === id)
+
+    if (!article) {
+      return [404, { message: '文章不存在' }]
+    }
+
+    return [200, article]
+  })
+
   // 创建文章接口
   mock.onPost('/articles').reply((config) => {
     const articleData = JSON.parse(config.data)
@@ -465,6 +566,7 @@ export function setupMock(axios: AxiosInstance) {
       author: currentUser?.name || '匿名用户',
       views: 0,
       cover:
+        articleData.cover ||
         'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
       publishedAt: articleData.status === 'published' ? new Date().toISOString() : '',
       createdAt: new Date().toISOString(),
@@ -476,16 +578,35 @@ export function setupMock(axios: AxiosInstance) {
     return [200, newArticle]
   })
 
-  // 获取文章详情
-  mock.onGet(/\/articles\/\d+/).reply((config) => {
+  // 更新文章接口
+  mock.onPut(/\/articles\/\d+/).reply((config) => {
     const id = parseInt(config.url!.split('/').pop()!)
-    const article = mockArticles.find((a) => a.id === id)
+    const updateData = JSON.parse(config.data)
+    const articleIndex = mockArticles.findIndex((a) => a.id === id)
 
-    if (!article) {
+    if (articleIndex === -1) {
       return [404, { message: '文章不存在' }]
     }
 
-    return [200, article]
+    const article = mockArticles[articleIndex]
+
+    // 更新文章信息
+    const updatedArticle = {
+      ...article,
+      ...updateData,
+      id: article.id, // 确保 ID 不被修改
+      author: article.author, // 保持原作者
+      views: article.views, // 保持浏览次数
+      createdAt: article.createdAt, // 保持创建时间
+      updatedAt: new Date().toISOString(),
+      publishedAt: updateData.status === 'published' && article.status !== 'published' 
+        ? new Date().toISOString() 
+        : article.publishedAt,
+    }
+
+    mockArticles[articleIndex] = updatedArticle
+
+    return [200, updatedArticle]
   })
 
   // 删除用户

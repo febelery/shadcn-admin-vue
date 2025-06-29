@@ -36,6 +36,16 @@ const users: RouteRecordRaw = {
       },
     },
     {
+      path: 'edit/:id',
+      name: 'users-edit',
+      component: () => import('@/views/users/edit.vue'),
+      meta: {
+        title: '编辑用户',
+        permission: 'users.edit',
+        hideInMenu: true, // 编辑页面不在菜单中显示
+      },
+    },
+    {
       path: 'audit',
       name: 'users-audit',
       component: () => import('@/views/coming-soon/index.vue'),
