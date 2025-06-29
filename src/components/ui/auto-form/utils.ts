@@ -1,4 +1,5 @@
-import type { z } from 'zod'
+import { z } from 'zod'
+import { hasFileUploadConfig } from '@/lib/zod-file-extensions'
 
 // TODO: This should support recursive ZodEffects but TypeScript doesn't allow circular type definitions.
 export type ZodObjectOrWrapped =
@@ -55,6 +56,24 @@ export function getBaseSchema<
  */
 export function getBaseType(schema: z.ZodAny) {
   const baseSchema = getBaseSchema(schema)
+
+  // 检查是否是文件上传类型（包括数组中的文件上传）
+  if (baseSchema && hasFileUploadConfig(baseSchema)) {
+    return 'fileUpload'
+  }
+
+  // 安全地检查数组元素是否为文件上传类型
+  if (baseSchema instanceof z.ZodArray) {
+    try {
+      const elementType = (baseSchema._def as any).type
+      if (elementType && hasFileUploadConfig(elementType)) {
+        return 'fileUpload'
+      }
+    } catch {
+      // 如果访问 type 属性失败，忽略错误
+    }
+  }
+
   return baseSchema ? baseSchema._def.typeName : '';
 }
 

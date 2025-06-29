@@ -42,22 +42,16 @@ const isLoading = computed(() => {
     <SidebarMenu>
       <!-- 加载状态 -->
       <template v-if="isLoading">
-        <div class="p-4 text-sm text-muted-foreground">
-          正在加载菜单...
-        </div>
+        <div class="text-muted-foreground p-4 text-sm">正在加载菜单...</div>
       </template>
-      
+
       <!-- 菜单项 -->
       <template v-else>
         <template v-for="item in filteredMenuItems" :key="item.title">
           <!-- 没有子项的顶级菜单项 -->
           <SidebarMenuItem v-if="!item.items || item.items.length === 0">
-            <SidebarMenuButton 
-              as-child 
-              :data-active="item.isActive"
-              :disabled="item.disabled"
-            >
-              <router-link 
+            <SidebarMenuButton as-child :data-active="item.isActive" :disabled="item.disabled">
+              <router-link
                 :to="item.url"
                 :target="item.target"
                 :class="{ 'pointer-events-none opacity-50': item.disabled }"
@@ -79,8 +73,8 @@ const isLoading = computed(() => {
           >
             <SidebarMenuItem>
               <CollapsibleTrigger as-child>
-                <SidebarMenuButton 
-                  :tooltip="item.title" 
+                <SidebarMenuButton
+                  :tooltip="item.title"
                   :class="getMenuActiveState(item) && ''"
                   :disabled="item.disabled"
                 >

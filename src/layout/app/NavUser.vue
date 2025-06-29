@@ -4,8 +4,8 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
-import { useUserStore } from '@/stores/user'
 import { useLockScreen } from '@/composables/useLockScreen'
+import { useUserStore } from '@/stores/user'
 
 const { isMobile } = useSidebar()
 const userStore = useUserStore()
@@ -100,7 +100,7 @@ const getAvatarFallback = (name: string): string => {
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold">{{ user.name }}</span>
                 <span class="truncate text-xs">{{ user.email }}</span>
-                <span v-if="user.role" class="truncate text-xs text-muted-foreground">{{ user.role }}</span>
+                <span v-if="user.role" class="text-muted-foreground truncate text-xs">{{ user.role }}</span>
               </div>
             </div>
           </DropdownMenuLabel>

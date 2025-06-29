@@ -1,39 +1,42 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { ArrowLeft, Save } from 'lucide-vue-next'
+import * as z from 'zod'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { createUserApi } from '@/api/users'
 import type { CreateUserParams } from '@/api/users'
-import * as z from 'zod'
 
 const router = useRouter()
 
 // 定义表单验证 schema
-const formSchema = z.object({
-  name: z.string().min(2, '姓名至少需要2个字符').max(50, '姓名不能超过50个字符'),
-  username: z.string().min(2, '用户名至少需要2个字符').max(50, '用户名不能超过50个字符'),
-  email: z.string().email('请输入有效的邮箱地址'),
-  password: z.string()
-    .min(8, '密码至少需要8个字符')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密码必须包含大小写字母和数字'),
-  confirmPassword: z.string(),
-  role: z.enum(['admin', 'editor', 'user'], {
-    required_error: '请选择用户角色',
-  }),
-  status: z.enum(['active', 'inactive'], {
-    required_error: '请选择用户状态',
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: '密码确认不匹配',
-  path: ['confirmPassword'],
-})
+const formSchema = z
+  .object({
+    name: z.string().min(2, '姓名至少需要2个字符').max(50, '姓名不能超过50个字符'),
+    username: z.string().min(2, '用户名至少需要2个字符').max(50, '用户名不能超过50个字符'),
+    email: z.string().email('请输入有效的邮箱地址'),
+    password: z
+      .string()
+      .min(8, '密码至少需要8个字符')
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密码必须包含大小写字母和数字'),
+    confirmPassword: z.string(),
+    role: z.enum(['admin', 'editor', 'user'], {
+      required_error: '请选择用户角色',
+    }),
+    status: z.enum(['active', 'inactive'], {
+      required_error: '请选择用户状态',
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: '密码确认不匹配',
+    path: ['confirmPassword'],
+  })
 
 const isSubmitting = ref(false)
 
 const handleSubmit = async (values: z.infer<typeof formSchema>) => {
   isSubmitting.value = true
-  
+
   try {
     const createData: CreateUserParams = {
       name: values.name,
@@ -142,9 +145,7 @@ const goBack = () => {
                   <Save class="mr-2 h-4 w-4" />
                   {{ isSubmitting ? '创建中...' : '创建用户' }}
                 </Button>
-                <Button type="button" variant="outline" @click="goBack" class="flex-1">
-                  取消
-                </Button>
+                <Button type="button" variant="outline" @click="goBack" class="flex-1"> 取消 </Button>
               </div>
             </AutoForm>
           </CardContent>
@@ -158,25 +159,25 @@ const goBack = () => {
             <CardTitle>创建提示</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul class="text-sm text-muted-foreground space-y-2">
+            <ul class="text-muted-foreground space-y-2 text-sm">
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>用户名用于登录，不能与其他用户重复</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>密码至少8位字符，包含大小写字母和数字</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>邮箱将用于接收系统通知</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>角色决定用户在系统中的权限范围</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>创建后可以随时修改用户信息</span>
               </li>
             </ul>

@@ -3,11 +3,9 @@
 // import { onMounted } from 'vue'
 // import { useSiteHeader } from '@/stores/siteHeader'
 // import SectionCards from './components/SectionCards.vue'
-
 // onMounted(() => {
 //   useSiteHeader().setTitle('Dashboard')
 // })
-
 import SectionCards from './components/SectionCards.vue'
 </script>
 

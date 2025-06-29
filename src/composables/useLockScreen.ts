@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const LOCK_SCREEN_KEY = 'lock-screen-state'
 

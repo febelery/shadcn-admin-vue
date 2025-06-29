@@ -11,7 +11,7 @@ export function generateBreadcrumbFromRoute(matched: RouteLocationMatched[]): Br
 
   matched.forEach((route, index) => {
     const meta = route.meta
-    
+
     // 跳过没有标题的路由
     if (!meta?.title) return
 
@@ -19,7 +19,7 @@ export function generateBreadcrumbFromRoute(matched: RouteLocationMatched[]): Br
     if (meta.hideBreadcrumb) return
 
     const isLast = index === matched.length - 1
-    
+
     // 构建面包屑项
     const breadcrumbItem: BreadcrumbItem = {
       title: meta.title as string,
@@ -46,11 +46,11 @@ export function generateBreadcrumbFromRoute(matched: RouteLocationMatched[]): Br
  */
 export function generateSmartBreadcrumb(matched: RouteLocationMatched[], currentPath: string): BreadcrumbItem[] {
   const breadcrumb = generateBreadcrumbFromRoute(matched)
-  
+
   // 如果面包屑为空或只有一项，尝试从当前路径推断
   if (breadcrumb.length <= 1) {
     const pathSegments = currentPath.split('/').filter(Boolean)
-    
+
     if (pathSegments.length > 1) {
       // 添加父级面包屑
       const parentPath = `/${pathSegments[0]}`
@@ -58,7 +58,7 @@ export function generateSmartBreadcrumb(matched: RouteLocationMatched[], current
         title: getRouteTitle(parentPath),
         href: parentPath,
       }
-      
+
       if (breadcrumb.length === 0) {
         breadcrumb.push(parentBreadcrumb)
       } else {
@@ -82,6 +82,6 @@ function getRouteTitle(path: string): string {
     '/articles': '文章',
     '/system': '系统',
   }
-  
+
   return titleMap[path] || path.replace('/', '').replace('-', ' ')
 }

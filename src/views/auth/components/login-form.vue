@@ -57,7 +57,8 @@
             description: '请输入您的用户名',
             inputProps: {
               placeholder: '请输入用户名',
-              class: 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
+              class:
+                'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
             },
           },
           password: {
@@ -67,7 +68,8 @@
               type: 'password',
               placeholder: '请输入密码',
               autocomplete: 'current-password',
-              class: 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
+              class:
+                'w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition-all duration-300',
             },
           },
         }"
@@ -83,7 +85,7 @@
 
       <!-- 测试账号提示 -->
       <div class="mt-6 rounded-lg bg-gray-50 p-4">
-        <h4 class="text-sm font-medium text-gray-900 mb-2">测试账号</h4>
+        <h4 class="mb-2 text-sm font-medium text-gray-900">测试账号</h4>
         <div class="space-y-1 text-xs text-gray-600">
           <div><strong>管理员:</strong> admin / asdfasdf</div>
           <div><strong>编辑:</strong> editor / asdfasdf</div>
@@ -106,12 +108,8 @@ const emit = defineEmits(['submit'])
 
 // 定义登录表单验证 schema
 const loginSchema = z.object({
-  username: z.string()
-    .min(2, '用户名至少需要2个字符')
-    .max(50, '用户名不能超过50个字符'),
-  password: z.string()
-    .min(6, '密码至少需要6个字符')
-    .max(100, '密码不能超过100个字符'),
+  username: z.string().min(2, '用户名至少需要2个字符').max(50, '用户名不能超过50个字符'),
+  password: z.string().min(6, '密码至少需要6个字符').max(100, '密码不能超过100个字符'),
 })
 
 // 表单提交处理函数

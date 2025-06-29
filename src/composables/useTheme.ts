@@ -1,4 +1,4 @@
-import { ref, onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -17,7 +17,7 @@ function getSystemTheme(): 'light' | 'dark' {
 // 应用主题到 DOM
 function applyTheme(newTheme: Theme) {
   const root = document.documentElement
-  
+
   if (newTheme === 'system') {
     const systemTheme = getSystemTheme()
     isDark.value = systemTheme === 'dark'
@@ -31,7 +31,7 @@ function applyTheme(newTheme: Theme) {
 // 从本地存储加载主题
 function loadTheme(): Theme {
   if (typeof window === 'undefined') return 'system'
-  
+
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme
     return stored || 'system'
@@ -43,7 +43,7 @@ function loadTheme(): Theme {
 // 保存主题到本地存储
 function saveTheme(newTheme: Theme) {
   if (typeof window === 'undefined') return
-  
+
   try {
     localStorage.setItem(THEME_STORAGE_KEY, newTheme)
   } catch {
@@ -84,7 +84,7 @@ export function useTheme() {
     }
 
     mediaQuery.addEventListener('change', handleChange)
-    
+
     // 返回清理函数
     return () => mediaQuery.removeEventListener('change', handleChange)
   }
@@ -98,7 +98,7 @@ export function useTheme() {
   onMounted(() => {
     initTheme()
     const cleanup = setupSystemThemeListener()
-    
+
     // 组件卸载时清理
     return cleanup
   })

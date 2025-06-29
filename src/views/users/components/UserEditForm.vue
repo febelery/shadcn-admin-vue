@@ -1,38 +1,44 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { toast } from 'vue-sonner'
 import * as z from 'zod'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
 
 // 定义表单验证 schema（编辑时密码可选）
-const editFormSchema = z.object({
-  name: z.string().min(2, '姓名至少需要2个字符').max(50, '姓名不能超过50个字符'),
-  email: z.string().email('请输入有效的邮箱地址'),
-  password: z.string()
-    .min(8, '密码至少需要8个字符')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密码必须包含大小写字母和数字')
-    .optional()
-    .or(z.literal('')),
-  confirmPassword: z.string().optional().or(z.literal('')),
-  role: z.enum(['admin', 'editor', 'user'], {
-    required_error: '请选择用户角色',
-  }),
-  status: z.enum(['active', 'inactive'], {
-    required_error: '请选择用户状态',
-  }),
-}).refine((data) => {
-  // 如果输入了密码，则必须确认密码
-  if (data.password && data.password.length > 0) {
-    return data.password === data.confirmPassword
-  }
-  return true
-}, {
-  message: '密码确认不匹配',
-  path: ['confirmPassword'],
-})
+const editFormSchema = z
+  .object({
+    name: z.string().min(2, '姓名至少需要2个字符').max(50, '姓名不能超过50个字符'),
+    email: z.string().email('请输入有效的邮箱地址'),
+    password: z
+      .string()
+      .min(8, '密码至少需要8个字符')
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密码必须包含大小写字母和数字')
+      .optional()
+      .or(z.literal('')),
+    confirmPassword: z.string().optional().or(z.literal('')),
+    role: z.enum(['admin', 'editor', 'user'], {
+      required_error: '请选择用户角色',
+    }),
+    status: z.enum(['active', 'inactive'], {
+      required_error: '请选择用户状态',
+    }),
+  })
+  .refine(
+    (data) => {
+      // 如果输入了密码，则必须确认密码
+      if (data.password && data.password.length > 0) {
+        return data.password === data.confirmPassword
+      }
+      return true
+    },
+    {
+      message: '密码确认不匹配',
+      path: ['confirmPassword'],
+    }
+  )
 
 const isSubmitting = ref(false)
 const initialData = ref({
@@ -40,7 +46,7 @@ const initialData = ref({
   email: '',
   password: '',
   confirmPassword: '',
-  role: 'user' as const,
+  role: 'user' as string,
   status: 'active' as const,
 })
 
@@ -49,8 +55,8 @@ onMounted(async () => {
   const userId = route.params.id
   if (userId) {
     // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
     // 模拟数据
     initialData.value = {
       name: '张三',
@@ -65,11 +71,11 @@ onMounted(async () => {
 
 const handleSubmit = async (values: z.infer<typeof editFormSchema>) => {
   isSubmitting.value = true
-  
+
   try {
     // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     toast.success('用户信息更新成功')
     router.push('/users')
   } catch (error) {
@@ -160,9 +166,7 @@ const goBack = () => {
                   <Save class="mr-2 h-4 w-4" />
                   {{ isSubmitting ? '保存中...' : '保存更改' }}
                 </Button>
-                <Button type="button" variant="outline" @click="goBack" class="flex-1">
-                  取消
-                </Button>
+                <Button type="button" variant="outline" @click="goBack" class="flex-1"> 取消 </Button>
               </div>
             </AutoForm>
           </CardContent>
@@ -176,21 +180,21 @@ const goBack = () => {
             <CardTitle>编辑提示</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul class="text-sm text-muted-foreground space-y-2">
+            <ul class="text-muted-foreground space-y-2 text-sm">
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500"></div>
                 <span>密码字段留空则不修改当前密码</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500"></div>
                 <span>修改邮箱后用户需要使用新邮箱登录</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500"></div>
                 <span>角色变更会立即影响用户权限</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500"></div>
                 <span>禁用用户将阻止其登录系统</span>
               </li>
             </ul>

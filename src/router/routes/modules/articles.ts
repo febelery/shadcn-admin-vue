@@ -11,7 +11,7 @@ const articles: RouteRecordRaw = {
     permission: 'articles',
     order: 3,
     group: 'content',
-    requiresAuth: true, 
+    requiresAuth: true,
   },
   children: [
     {

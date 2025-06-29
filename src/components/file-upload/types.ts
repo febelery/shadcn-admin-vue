@@ -11,6 +11,7 @@ export enum FileType {
   IMAGE_SVG = 'image/svg+xml',
 
   // 文档类型
+  DOCUMENTS_ALL = 'application/*',
   PDF = 'application/pdf',
   WORD = 'application/msword',
   WORD_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -38,6 +39,8 @@ export enum FileType {
   // 压缩文件
   ZIP = 'application/zip',
   RAR = 'application/x-rar-compressed',
+
+  ALL = '*',
 }
 
 /**
@@ -68,7 +71,7 @@ export const FileTypeGroups = {
 /**
  * 友好名称映射
  */
-export const FileTypeFriendlyNames: Record<FileType, string> = {
+export const FileTypeFriendlyNames: Partial<Record<FileType, string>> = {
   [FileType.IMAGE_ALL]: '图片',
   [FileType.IMAGE_JPEG]: 'JPEG图片',
   [FileType.IMAGE_PNG]: 'PNG图片',
@@ -76,6 +79,7 @@ export const FileTypeFriendlyNames: Record<FileType, string> = {
   [FileType.IMAGE_WEBP]: 'WebP图片',
   [FileType.IMAGE_SVG]: 'SVG图片',
 
+  [FileType.DOCUMENTS_ALL]: '文档',
   [FileType.PDF]: 'PDF文档',
   [FileType.WORD]: 'Word文档',
   [FileType.WORD_DOCX]: 'Word文档',
@@ -99,6 +103,8 @@ export const FileTypeFriendlyNames: Record<FileType, string> = {
 
   [FileType.ZIP]: 'ZIP压缩包',
   [FileType.RAR]: 'RAR压缩包',
+
+  [FileType.ALL]: '所有文件',
 }
 
 export type AcceptedFileType = FileType | string | (FileType | string)[]

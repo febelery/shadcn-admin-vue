@@ -44,11 +44,11 @@
 <script setup lang="ts">
 import confetti from 'canvas-confetti'
 import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { useUserStore } from '@/stores/user'
 import { useMenuStore } from '@/stores/menu'
 import { usePermissionStore } from '@/stores/permission'
+import { useUserStore } from '@/stores/user'
 import LoginForm from './components/login-form.vue'
 import OtpScan from './components/otp-scan.vue'
 
@@ -65,10 +65,10 @@ const otpKey = ref('')
 function getFirstAccessibleRoute(permissions: string[]): string {
   // 初始化菜单
   menuStore.initializeMenu()
-  
+
   // 根据权限过滤菜单
   const filteredMenuItems = menuStore.filteredMenuItems(permissions)
-  
+
   // 递归查找第一个可访问的路由
   function findFirstRoute(items: any[]): string | null {
     for (const item of items) {
@@ -85,19 +85,19 @@ function getFirstAccessibleRoute(permissions: string[]): string {
     }
     return null
   }
-  
+
   const firstRoute = findFirstRoute(filteredMenuItems)
-  
+
   // 如果找到了路由，返回；否则返回默认路由
   if (firstRoute) {
     return firstRoute
   }
-  
+
   // 如果没有找到任何可访问的路由，检查是否有仪表板权限
   if (permissions.includes('dashboard.view')) {
     return '/dashboard'
   }
-  
+
   // 最后的兜底方案
   return '/403'
 }
@@ -109,7 +109,7 @@ const handleLogin = async (values: Record<string, any>) => {
     const res = await userStore.login(values)
 
     if (res.needOtp) {
-      otpKey.value = res.otpKey
+      otpKey.value = res.otpKey as string
     } else {
       loginSuccess()
     }
@@ -133,10 +133,10 @@ const handleOtpBack = () => {
 const loginSuccess = () => {
   toast.success('登录成功')
   celebrate()
-  
+
   // 获取重定向地址，确保不会有重复的redirect参数
   let redirect = route.query.redirect as string
-  
+
   if (redirect) {
     // 解码重定向URL
     try {

@@ -1,5 +1,5 @@
-import type { Component } from 'vue'
 import type { LucideIcon } from 'lucide-vue-next'
+import type { Component } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 // 菜单项接口

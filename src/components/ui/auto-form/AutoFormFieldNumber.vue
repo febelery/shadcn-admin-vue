@@ -34,7 +34,6 @@ const shouldShowError = props.shouldShowError || defaultShouldShowError
         <slot v-bind="slotProps">
           <Input 
             :id="fieldName"
-            :name="fieldName"
             type="number" 
             v-bind="{ 
               ...slotProps.componentField, 

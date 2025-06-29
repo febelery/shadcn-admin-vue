@@ -41,4 +41,5 @@ export const DEFAULT_ZOD_HANDLERS: {
   ZodNumber: 'number',
   ZodArray: 'array',
   ZodObject: 'object',
+  fileUpload: 'fileUpload', // 添加文件上传类型处理
 }

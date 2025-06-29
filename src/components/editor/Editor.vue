@@ -10,8 +10,8 @@ import type { HTMLAttributes } from 'vue'
 import { toast } from 'vue-sonner'
 import { uploadToQiniu, uploadUrl } from '@/components/file-upload/fileUploadService'
 import { createUploadFile } from '@/components/file-upload/fileUtils'
-import { cn } from '@/lib/utils'
 import { useTheme } from '@/composables/useTheme'
+import { cn } from '@/lib/utils'
 
 const divRef = ref()
 let aiEditor: AiEditor | null = null
@@ -34,7 +34,7 @@ const emit = defineEmits(['update:modelValue'])
 const { isDark } = useTheme()
 
 // 计算当前主题
-const currentTheme = computed(() => isDark.value ? 'dark' : 'light')
+const currentTheme = computed(() => (isDark.value ? 'dark' : 'light'))
 
 const toolbarFull = [
   'undo',
@@ -168,32 +168,39 @@ const createEditor = () => {
 }
 
 // 监听主题变化，重新创建编辑器
-watch(currentTheme, (newTheme) => {
-  if (aiEditor) {
-    // 保存当前内容
-    const currentContent = aiEditor.getHtml()
-    
-    // 销毁旧编辑器
-    aiEditor.destroy()
-    aiEditor = null
-    
-    // 等待 DOM 更新后重新创建编辑器
-    setTimeout(() => {
-      createEditor()
-      // 恢复内容
-      if (aiEditor && currentContent !== props.modelValue) {
-        aiEditor.setContent(currentContent)
-      }
-    }, 100)
-  }
-}, { immediate: false })
+watch(
+  currentTheme,
+  (newTheme) => {
+    if (aiEditor) {
+      // 保存当前内容
+      const currentContent = aiEditor.getHtml()
+
+      // 销毁旧编辑器
+      aiEditor.destroy()
+      aiEditor = null
+
+      // 等待 DOM 更新后重新创建编辑器
+      setTimeout(() => {
+        createEditor()
+        // 恢复内容
+        if (aiEditor && currentContent !== props.modelValue) {
+          aiEditor.setContent(currentContent)
+        }
+      }, 100)
+    }
+  },
+  { immediate: false }
+)
 
 // 监听 modelValue 变化
-watch(() => props.modelValue, (newValue) => {
-  if (aiEditor && aiEditor.getHtml() !== newValue) {
-    aiEditor.setContent(newValue)
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (aiEditor && aiEditor.getHtml() !== newValue) {
+      aiEditor.setContent(newValue)
+    }
   }
-})
+)
 
 onMounted(() => {
   createEditor()

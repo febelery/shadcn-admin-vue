@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye, Calendar } from 'lucide-vue-next'
+import { Calendar, Edit, Eye, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-vue-next'
+import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
-import { getArticlesApi, deleteArticleApi } from '@/api/articles'
+import { deleteArticleApi, getArticlesApi } from '@/api/articles'
 import type { Article, ArticleListParams } from '@/api/articles'
 
 // 响应式数据
@@ -11,6 +11,7 @@ const loading = ref(false)
 const searchQuery = ref('')
 const selectedCategory = ref('all')
 const selectedStatus = ref('all')
+const openDropdowns = ref<Record<number, boolean>>({})
 const pagination = ref({
   page: 1,
   pageSize: 10,
@@ -32,6 +33,9 @@ const fetchArticles = async () => {
     const response = await getArticlesApi(params)
     articles.value = response.data.data
     pagination.value.total = response.data.total
+
+    // 重置下拉菜单状态
+    openDropdowns.value = {}
   } catch (error: any) {
     toast.error('获取文章列表失败')
     console.error('获取文章列表失败:', error)
@@ -45,6 +49,9 @@ const deleteArticle = async (id: number, title: string) => {
   if (!confirm(`确定要删除文章 "${title}" 吗？此操作不可恢复。`)) {
     return
   }
+
+  // 关闭对应的下拉菜单
+  openDropdowns.value[id] = false
 
   try {
     await deleteArticleApi(id)
@@ -148,14 +155,9 @@ const getCategoryText = (category: string) => {
     <Card>
       <CardHeader>
         <div class="flex items-center gap-4">
-          <div class="relative flex-1 max-w-sm">
-            <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              v-model="searchQuery"
-              placeholder="搜索文章..."
-              class="pl-9"
-              @keyup.enter="handleSearch"
-            />
+          <div class="relative max-w-sm flex-1">
+            <Search class="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Input v-model="searchQuery" placeholder="搜索文章..." class="pl-9" @keyup.enter="handleSearch" />
           </div>
           <Select v-model="selectedCategory" @update:model-value="handleFilter">
             <SelectTrigger class="w-32">
@@ -188,7 +190,7 @@ const getCategoryText = (category: string) => {
     <!-- 文章列表 -->
     <div v-if="loading" class="flex items-center justify-center py-8">
       <div class="text-center">
-        <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        <div class="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"></div>
         <p class="text-muted-foreground text-sm">正在加载...</p>
       </div>
     </div>
@@ -205,7 +207,7 @@ const getCategoryText = (category: string) => {
         <CardHeader class="pb-3">
           <div class="flex items-start justify-between gap-2">
             <CardTitle class="line-clamp-2 text-lg">{{ article.title }}</CardTitle>
-            <DropdownMenu>
+            <DropdownMenu v-model:open="openDropdowns[article.id]">
               <DropdownMenuTrigger as-child>
                 <Button variant="ghost" size="icon" class="h-8 w-8">
                   <MoreHorizontal class="h-4 w-4" />
@@ -221,10 +223,7 @@ const getCategoryText = (category: string) => {
                   编辑
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  variant="destructive" 
-                  @click="deleteArticle(article.id, article.title)"
-                >
+                <DropdownMenuItem variant="destructive" @click="deleteArticle(article.id, article.title)">
                   <Trash2 class="mr-2 h-4 w-4" />
                   删除
                 </DropdownMenuItem>
@@ -236,7 +235,7 @@ const getCategoryText = (category: string) => {
           </CardDescription>
         </CardHeader>
         <CardContent class="pt-0">
-          <div class="flex items-center justify-between text-sm text-muted-foreground">
+          <div class="text-muted-foreground flex items-center justify-between text-sm">
             <div class="flex items-center gap-2">
               <Calendar class="h-4 w-4" />
               {{ new Date(article.publishedAt || article.createdAt).toLocaleDateString() }}
@@ -252,9 +251,7 @@ const getCategoryText = (category: string) => {
                 {{ getStatusText(article.status) }}
               </Badge>
             </div>
-            <div class="text-sm text-muted-foreground">
-              by {{ article.author }}
-            </div>
+            <div class="text-muted-foreground text-sm">by {{ article.author }}</div>
           </div>
         </CardContent>
       </Card>
@@ -262,25 +259,35 @@ const getCategoryText = (category: string) => {
 
     <!-- 分页 -->
     <div v-if="pagination.total > pagination.pageSize" class="mt-4 flex items-center justify-between">
-      <div class="text-sm text-muted-foreground">
-        显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} - 
-        {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }} 
+      <div class="text-muted-foreground text-sm">
+        显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} -
+        {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }}
         共 {{ pagination.total }} 条
       </div>
       <div class="flex items-center gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           :disabled="pagination.page <= 1"
-          @click="pagination.page--; fetchArticles()"
+          @click="
+            () => {
+              pagination.page--
+              fetchArticles()
+            }
+          "
         >
           上一页
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           :disabled="pagination.page >= Math.ceil(pagination.total / pagination.pageSize)"
-          @click="pagination.page++; fetchArticles()"
+          @click="
+            () => {
+              pagination.page++
+              fetchArticles()
+            }
+          "
         >
           下一页
         </Button>

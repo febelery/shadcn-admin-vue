@@ -1,34 +1,55 @@
 <script setup lang="ts">
-import { ArrowLeft, Save, Eye } from 'lucide-vue-next'
+import { ArrowLeft, Eye } from 'lucide-vue-next'
+import * as z from 'zod'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { createArticleApi } from '@/api/articles'
 import type { CreateArticleParams } from '@/api/articles'
 import { FileType } from '@/components/file-upload/types'
-import * as z from 'zod'
 
 const router = useRouter()
 
-// 定义表单验证 schema
+// 定义表单验证 schema - 展示多种文件上传写法
 const formSchema = z.object({
-  title: z.string()
-    .min(5, '标题至少需要5个字符')
-    .max(100, '标题不能超过100个字符'),
-  excerpt: z.string()
-    .min(10, '摘要至少需要10个字符')
-    .max(300, '摘要不能超过300个字符')
-    .optional(),
-  content: z.string()
-    .min(10, '文章内容至少需要10个字符'),
-  cover: z.string()
-    .url('请上传有效的封面图片')
-    .optional(),
+  title: z.string().min(5, '标题至少需要5个字符').max(100, '标题不能超过100个字符'),
+  excerpt: z.string().min(10, '摘要至少需要10个字符').max(300, '摘要不能超过300个字符').optional(),
+  content: z.string().min(10, '文章内容至少需要10个字符'),
+
+  // 单个封面图片
+  cover: z
+    .string()
+    .fileUpload({
+      acceptedTypes: FileType.IMAGE_ALL,
+      maxFiles: 1,
+      maxSize: 5 * 1024 * 1024, // 5MB
+    })
+    .describe('文章封面图片'),
+
+  // 多个附件（混合类型）
+  attachments: z
+    .array(z.string())
+    .fileUpload({
+      acceptedTypes: [FileType.IMAGE_ALL, FileType.PDF, FileType.WORD_DOCX],
+      maxFiles: 5,
+      maxSize: 10 * 1024 * 1024, // 10MB
+    })
+    .optional()
+    .describe('附件文件（支持图片和文档）'),
+
   category: z.enum(['tech', 'tools', 'tutorial', 'news'], {
     required_error: '请选择文章分类',
   }),
-  tags: z.string()
+  tags: z
+    .string()
     .optional()
-    .transform((val) => val ? val.split(',').map(tag => tag.trim()).filter(Boolean) : []),
+    .transform((val) =>
+      val
+        ? val
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter(Boolean)
+        : []
+    ),
   status: z.enum(['draft', 'published'], {
     required_error: '请选择发布状态',
   }),
@@ -47,7 +68,7 @@ const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     }
 
     await createArticleApi(createData)
-    
+
     const action = values.status === 'published' ? '发布' : '保存'
     toast.success(`文章${action}成功`)
     router.push('/articles')
@@ -78,7 +99,7 @@ const goBack = () => {
 
     <!-- 表单 -->
     <div class="grid gap-6 lg:grid-cols-4">
-      <div class="lg:col-span-3 space-y-6">
+      <div class="space-y-6 lg:col-span-3">
         <!-- 文章表单 -->
         <Card>
           <CardHeader>
@@ -102,7 +123,6 @@ const goBack = () => {
                   component: 'textarea',
                   inputProps: {
                     placeholder: '请输入文章摘要',
-                    rows: 3,
                   },
                 },
                 content: {
@@ -117,14 +137,10 @@ const goBack = () => {
                 cover: {
                   label: '封面图片',
                   description: '文章的封面图片，建议尺寸 16:9',
-                  component: 'fileUpload',
-                  inputProps: {
-                    maxFiles: 2,
-                    acceptedTypes: [FileType.IMAGE_ALL],
-                    maxSize: 5 * 1024 * 1024, // 5MB
-                    autoUpload: true,
-                    useQiniu: true,
-                  },
+                },
+                attachments: {
+                  label: '附件文件',
+                  description: '文章的附件文件，支持图片和文档，最多5个文件',
                 },
                 category: {
                   label: '分类',
@@ -151,47 +167,62 @@ const goBack = () => {
                 <!-- 基本信息字段 -->
                 <div class="grid gap-6 md:grid-cols-2">
                   <AutoFormField
+                    v-if="fields.title"
                     :config="fields.title.config"
                     :field-name="fields.title.fieldName"
                     :shape="fields.title.shape"
                   />
                   <AutoFormField
+                    v-if="fields.category"
                     :config="fields.category.config"
                     :field-name="fields.category.fieldName"
                     :shape="fields.category.shape"
                   />
                 </div>
-                
+
                 <!-- 摘要字段 -->
                 <AutoFormField
+                  v-if="fields.excerpt"
                   :config="fields.excerpt.config"
                   :field-name="fields.excerpt.fieldName"
                   :shape="fields.excerpt.shape"
                 />
-                
+
                 <!-- 封面图片 -->
                 <AutoFormField
+                  v-if="fields.cover"
                   :config="fields.cover.config"
                   :field-name="fields.cover.fieldName"
                   :shape="fields.cover.shape"
                 />
-                
+
+                <!-- 附件文件 -->
+                <AutoFormField
+                  v-if="fields.attachments"
+                  :config="fields.attachments.config"
+                  :field-name="fields.attachments.fieldName"
+                  :shape="fields.attachments.shape"
+                />
+
                 <!-- 标签和状态 -->
                 <div class="grid gap-6 md:grid-cols-2">
                   <AutoFormField
+                    v-if="fields.tags"
                     :config="fields.tags.config"
                     :field-name="fields.tags.fieldName"
                     :shape="fields.tags.shape"
                   />
                   <AutoFormField
+                    v-if="fields.status"
                     :config="fields.status.config"
                     :field-name="fields.status.fieldName"
                     :shape="fields.status.shape"
                   />
                 </div>
-                
+
                 <!-- 内容编辑器 -->
                 <AutoFormField
+                  v-if="fields.content"
                   :config="fields.content.config"
                   :field-name="fields.content.fieldName"
                   :shape="fields.content.shape"
@@ -203,9 +234,7 @@ const goBack = () => {
                   <Eye class="mr-2 h-4 w-4" />
                   发布文章
                 </Button>
-                <Button type="button" variant="outline" @click="goBack" class="flex-1">
-                  取消
-                </Button>
+                <Button type="button" variant="outline" @click="goBack" class="flex-1"> 取消 </Button>
               </div>
             </AutoForm>
           </CardContent>
@@ -220,53 +249,88 @@ const goBack = () => {
             <CardTitle>写作提示</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul class="text-sm text-muted-foreground space-y-2">
+            <ul class="text-muted-foreground space-y-2 text-sm">
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>标题要简洁明了，突出文章主题</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>摘要控制在150字以内，概括文章要点</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>封面图片建议使用 16:9 比例</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>合理使用标签便于读者检索</span>
               </li>
               <li class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></div>
                 <span>定期保存避免内容丢失</span>
               </li>
             </ul>
           </CardContent>
         </Card>
 
-        <!-- 分类说明 -->
+        <!-- 文件上传示例 -->
         <Card>
           <CardHeader>
-            <CardTitle>分类说明</CardTitle>
+            <CardTitle class="text-sm">文件上传示例</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div class="space-y-3 text-sm">
-              <div>
-                <div class="font-medium text-blue-600">技术</div>
-                <div class="text-muted-foreground">技术教程、开发经验</div>
+          <CardContent class="space-y-4">
+            <!-- 单文件上传 -->
+            <div class="space-y-2">
+              <div class="text-xs font-medium text-blue-600">单文件上传</div>
+              <div class="bg-muted rounded-md p-2">
+                <code class="text-xs break-all">
+                  z.string().fileUpload({<br />
+                  &nbsp;&nbsp;acceptedTypes: FileType.IMAGE_ALL,<br />
+                  &nbsp;&nbsp;maxFiles: 1<br />
+                  })
+                </code>
               </div>
-              <div>
-                <div class="font-medium text-green-600">工具</div>
-                <div class="text-muted-foreground">工具推荐、使用指南</div>
+            </div>
+
+            <!-- 多文件上传 -->
+            <div class="space-y-2">
+              <div class="text-xs font-medium text-green-600">多文件上传</div>
+              <div class="bg-muted rounded-md p-2">
+                <code class="text-xs break-all">
+                  z.array(z.string()).fileUpload({<br />
+                  &nbsp;&nbsp;acceptedTypes: FileType.IMAGE_ALL,<br />
+                  &nbsp;&nbsp;maxFiles: 5<br />
+                  })
+                </code>
               </div>
-              <div>
-                <div class="font-medium text-purple-600">教程</div>
-                <div class="text-muted-foreground">步骤详细的操作指南</div>
+            </div>
+
+            <!-- 混合类型 -->
+            <div class="space-y-2">
+              <div class="text-xs font-medium text-purple-600">混合类型</div>
+              <div class="bg-muted rounded-md p-2">
+                <code class="text-xs break-all">
+                  z.array(z.string()).fileUpload({<br />
+                  &nbsp;&nbsp;acceptedTypes: [<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;FileType.IMAGE_ALL,<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;FileType.PDF,<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;FileType.WORD_DOCX<br />
+                  &nbsp;&nbsp;]<br />
+                  })
+                </code>
               </div>
-              <div>
-                <div class="font-medium text-orange-600">资讯</div>
-                <div class="text-muted-foreground">行业动态、新闻资讯</div>
+            </div>
+
+            <!-- 大小限制 -->
+            <div class="space-y-2">
+              <div class="text-xs font-medium text-orange-600">大小限制</div>
+              <div class="bg-muted rounded-md p-2">
+                <code class="text-xs break-all">
+                  .fileUpload({<br />
+                  &nbsp;&nbsp;maxSize: 10 * 1024 * 1024 // 10MB<br />
+                  })
+                </code>
               </div>
             </div>
           </CardContent>
@@ -275,25 +339,29 @@ const goBack = () => {
         <!-- 上传提示 -->
         <Card>
           <CardHeader>
-            <CardTitle>上传说明</CardTitle>
+            <CardTitle class="text-sm">上传说明</CardTitle>
           </CardHeader>
           <CardContent>
-            <div class="space-y-3 text-sm text-muted-foreground">
+            <div class="text-muted-foreground space-y-2 text-xs">
               <div class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-green-500"></div>
                 <span>支持 JPG、PNG、GIF、WebP 格式</span>
               </div>
               <div class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
-                <span>单个文件最大 5MB</span>
+                <div class="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-green-500"></div>
+                <span>单个文件最大 10MB</span>
               </div>
               <div class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-green-500"></div>
                 <span>建议图片尺寸 1200x675 像素</span>
               </div>
               <div class="flex items-start gap-2">
-                <div class="mt-1 h-1.5 w-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                <div class="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-green-500"></div>
                 <span>支持拖拽上传和粘贴上传</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-green-500"></div>
+                <span>多文件上传支持混合类型</span>
               </div>
             </div>
           </CardContent>

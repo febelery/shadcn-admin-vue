@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { useSiteHeader } from '@/composables/useSiteHeader'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { useSiteHeader } from '@/composables/useSiteHeader'
 import SearchForm from './SearchForm.vue'
 
 const router = useRouter()
@@ -22,13 +22,7 @@ const goBack = () => {
       <Separator orientation="vertical" class="mx-2 data-[orientation=vertical]:h-4" />
 
       <!-- 返回按钮 -->
-      <Button 
-        v-if="siteHeader.showBackButton.value" 
-        variant="ghost" 
-        size="icon" 
-        @click="goBack"
-        class="mr-2"
-      >
+      <Button v-if="siteHeader.showBackButton.value" variant="ghost" size="icon" @click="goBack" class="mr-2">
         <ArrowLeft class="h-4 w-4" />
       </Button>
 
@@ -58,8 +52,8 @@ const goBack = () => {
 
       <!-- 自定义操作按钮 -->
       <div v-if="siteHeader.customActions.value.length > 0" class="ml-auto flex items-center gap-2">
-        <component 
-          v-for="(action, index) in siteHeader.customActions.value" 
+        <component
+          v-for="(action, index) in siteHeader.customActions.value"
           :key="index"
           :is="action.component"
           v-bind="action.props"
@@ -71,7 +65,7 @@ const goBack = () => {
       <div class="ml-auto flex items-center gap-2">
         <!-- 搜索表单 -->
         <SearchForm class="w-full sm:w-auto" />
-        
+
         <!-- 主题切换按钮 -->
         <ThemeToggle />
       </div>

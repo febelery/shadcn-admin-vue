@@ -1,8 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { menuRoutes } from '@/router/routes'
-import { generateMenuFromRoutes, filterMenuByPermissions, findActiveMenuPath, setMenuActiveState } from '@/utils/menuGenerator'
 import type { MenuItem } from '@/types/menu'
+import {
+  filterMenuByPermissions,
+  findActiveMenuPath,
+  generateMenuFromRoutes,
+  setMenuActiveState,
+} from '@/utils/menuGenerator'
 
 interface MenuState {
   menuItems: MenuItem[]
@@ -32,7 +37,7 @@ export const useMenuStore = defineStore('menu', () => {
   const setActiveMenuPath = (path: string) => {
     // 设置菜单项的激活状态
     setMenuActiveState(state.value.menuItems, path)
-    
+
     // 查找激活路径
     state.value.activeMenuPath = findActiveMenuPath(state.value.menuItems, path)
   }
@@ -41,7 +46,7 @@ export const useMenuStore = defineStore('menu', () => {
   const activeMenuItem = computed(() => {
     const path = state.value.activeMenuPath
     if (path.length === 0) return null
-    
+
     const findMenuItem = (items: MenuItem[], targetPath: string): MenuItem | null => {
       for (const item of items) {
         if (item.url === targetPath) {
@@ -54,7 +59,7 @@ export const useMenuStore = defineStore('menu', () => {
       }
       return null
     }
-    
+
     return findMenuItem(state.value.menuItems, path[path.length - 1])
   })
 
@@ -78,7 +83,7 @@ export const useMenuStore = defineStore('menu', () => {
       }
       findParent(state.value.menuItems)
     }
-    
+
     // 重新排序
     state.value.menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
   }
@@ -87,20 +92,20 @@ export const useMenuStore = defineStore('menu', () => {
   const removeMenuItem = (path: string) => {
     const removeItem = (items: MenuItem[]): MenuItem[] => {
       return items
-        .filter(item => item.url !== path)
-        .map(item => ({
+        .filter((item) => item.url !== path)
+        .map((item) => ({
           ...item,
           items: item.items ? removeItem(item.items) : undefined,
         }))
     }
-    
+
     state.value.menuItems = removeItem(state.value.menuItems)
   }
 
   // 更新菜单项
   const updateMenuItem = (path: string, updates: Partial<MenuItem>) => {
     const updateItem = (items: MenuItem[]) => {
-      items.forEach(item => {
+      items.forEach((item) => {
         if (item.url === path) {
           Object.assign(item, updates)
         }
@@ -109,7 +114,7 @@ export const useMenuStore = defineStore('menu', () => {
         }
       })
     }
-    
+
     updateItem(state.value.menuItems)
   }
 
@@ -122,11 +127,11 @@ export const useMenuStore = defineStore('menu', () => {
     // state
     menuItems: computed(() => state.value.menuItems),
     activeMenuPath: computed(() => state.value.activeMenuPath),
-    
+
     // getters
     filteredMenuItems,
     activeMenuItem,
-    
+
     // actions
     generateMenuFromRouter,
     setActiveMenuPath,

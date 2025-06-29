@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import * as z from 'zod'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import * as z from 'zod'
 
 // 定义系统设置表单验证 schema
 const settingsSchema = z.object({
@@ -39,11 +39,11 @@ const defaultValues = {
 
 const handleSubmit = async (values: z.infer<typeof settingsSchema>) => {
   isSubmitting.value = true
-  
+
   try {
     // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     toast.success('系统设置保存成功')
   } catch (error) {
     toast.error('保存系统设置失败')
@@ -143,9 +143,7 @@ const handleSubmit = async (values: z.infer<typeof settingsSchema>) => {
               <Save class="mr-2 h-4 w-4" />
               {{ isSubmitting ? '保存中...' : '保存设置' }}
             </Button>
-            <Button type="button" variant="outline">
-              重置为默认值
-            </Button>
+            <Button type="button" variant="outline"> 重置为默认值 </Button>
           </div>
         </AutoForm>
       </CardContent>

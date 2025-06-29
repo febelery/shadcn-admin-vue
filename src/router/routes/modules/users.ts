@@ -11,7 +11,7 @@ const users: RouteRecordRaw = {
     permission: 'users',
     order: 2,
     group: 'management',
-    requiresAuth: true, 
+    requiresAuth: true,
   },
   children: [
     {

@@ -12,7 +12,9 @@
       <template #fallback>
         <div class="flex h-full items-center justify-center">
           <div class="text-center">
-            <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <div
+              class="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
+            ></div>
             <p class="text-muted-foreground text-sm">正在加载...</p>
           </div>
         </div>

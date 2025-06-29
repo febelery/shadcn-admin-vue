@@ -4,6 +4,8 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './api/interceptor'
 import './assets/main.css'
+// 导入 Zod 文件上传扩展
+import './lib/zod-file-extensions'
 import { setupGlobalZodMessages } from './lib/zod-messages'
 import router from './router'
 

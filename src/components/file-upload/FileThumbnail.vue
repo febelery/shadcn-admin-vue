@@ -8,8 +8,10 @@
     <div class="group relative cursor-pointer transition-all duration-500" @click.stop="emit('click')">
       <!-- 卡片容器 - 响应式尺寸 -->
       <div
-        class="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl border-2 bg-gradient-to-br from-gray-50 via-white to-gray-50 transition-all duration-300 ease-out dark:from-neutral-900 dark:via-neutral-950 dark:to-neutral-900 w-full min-w-0"
+        class="relative flex items-center justify-center overflow-hidden rounded-xl border-2 bg-gradient-to-br from-gray-50 via-white to-gray-50 transition-all duration-300 ease-out dark:from-neutral-900 dark:via-neutral-950 dark:to-neutral-900"
         :class="[
+          // 动态设置宽高比和边框
+          props.class || 'aspect-square w-full min-w-0',
           isSelected
             ? 'shimmer-border border-blue-500 shadow-lg shadow-blue-500/10 dark:border-blue-400 dark:shadow-blue-400/5'
             : isError
@@ -24,12 +26,12 @@
           :initial="{ opacity: 0, scale: 0.5 }"
           :animate="{ opacity: 1, scale: 1 }"
           :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
-          class="absolute top-1 right-1 sm:top-2 sm:right-2 z-30"
+          class="absolute top-1 right-1 z-30 sm:top-2 sm:right-2"
         >
           <div
-            class="flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-green-100 shadow-sm dark:bg-green-900/30"
+            class="flex h-4 w-4 items-center justify-center rounded-full bg-green-100 shadow-sm sm:h-6 sm:w-6 dark:bg-green-900/30"
           >
-            <CheckCircle class="size-3 sm:size-5 text-green-600 dark:text-green-400" />
+            <CheckCircle class="size-3 text-green-600 sm:size-5 dark:text-green-400" />
           </div>
         </Motion>
 
@@ -39,15 +41,15 @@
           :initial="{ opacity: 0, scale: 0.5 }"
           :animate="{ opacity: 1, scale: 1 }"
           :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
-          class="absolute top-1 right-1 sm:top-2 sm:right-2 z-30"
+          class="absolute top-1 right-1 z-30 sm:top-2 sm:right-2"
         >
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div
-                  class="flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-red-100 shadow-sm dark:bg-red-900/30"
+                  class="flex h-4 w-4 items-center justify-center rounded-full bg-red-100 shadow-sm sm:h-6 sm:w-6 dark:bg-red-900/30"
                 >
-                  <AlertTriangle class="size-3 sm:size-5 text-red-600 dark:text-red-400" />
+                  <AlertTriangle class="size-3 text-red-600 sm:size-5 dark:text-red-400" />
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom">
@@ -67,21 +69,21 @@
           :initial="{ opacity: 0, y: 5 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
-          class="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 z-30"
+          class="absolute bottom-1 left-1 z-30 sm:bottom-2 sm:left-2"
         >
           <Motion :whileHover="{ scale: 1.05 }" :whileTap="{ scale: 0.95 }">
             <button
               @click.stop="$emit('remove')"
-              class="flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-gray-100/30 shadow-sm backdrop-blur-sm transition-colors hover:bg-red-100/70 dark:bg-neutral-800/30 dark:hover:bg-red-900/50"
+              class="flex h-4 w-4 items-center justify-center rounded-full bg-gray-100/30 shadow-sm backdrop-blur-sm transition-colors hover:bg-red-100/70 sm:h-6 sm:w-6 dark:bg-neutral-800/30 dark:hover:bg-red-900/50"
             >
-              <Trash class="size-2.5 sm:size-4 text-red-500 hover:font-bold" />
+              <Trash class="size-2.5 text-red-500 hover:font-bold sm:size-4" />
             </button>
           </Motion>
         </Motion>
 
         <!-- 圆形进度条 -->
         <div v-if="isUploading" class="absolute inset-0 z-30 flex items-center justify-center">
-          <div class="relative flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center">
+          <div class="relative flex h-12 w-12 items-center justify-center sm:h-16 sm:w-16">
             <!-- 环形进度轨道 -->
             <svg class="absolute h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
               <circle
@@ -104,7 +106,7 @@
             </svg>
             <!-- 中央进度文本 -->
             <span
-              class="z-10 rounded-md bg-white/80 px-1.5 py-0.5 sm:px-2 text-xs sm:text-sm font-bold text-blue-600 shadow-sm backdrop-blur-sm dark:bg-black/40 dark:text-blue-300"
+              class="z-10 rounded-md bg-white/80 px-1.5 py-0.5 text-xs font-bold text-blue-600 shadow-sm backdrop-blur-sm sm:px-2 sm:text-sm dark:bg-black/40 dark:text-blue-300"
             >
               {{ uploadProgress }}
             </span>
@@ -125,7 +127,7 @@
         <div v-else-if="isVideoFile(file)" class="relative h-full w-full">
           <video :src="previewUrl" class="h-full w-full object-cover" muted></video>
           <div class="absolute inset-0 flex items-center justify-center bg-black/30">
-            <PlayIcon class="size-4 sm:size-6 text-white" />
+            <PlayIcon class="size-4 text-white sm:size-6" />
           </div>
         </div>
 
@@ -133,14 +135,16 @@
         <div v-else class="flex flex-col items-center justify-center p-2 sm:p-4">
           <div
             :class="[
-              'flex h-10 w-10 sm:h-16 sm:w-16 items-center justify-center rounded-full shadow-md',
+              'flex h-10 w-10 items-center justify-center rounded-full shadow-md sm:h-16 sm:w-16',
               fileTypeConfig.bg,
               'transform transition-transform duration-300 group-hover:scale-105',
             ]"
           >
             <component :is="fileTypeConfig.icon" :class="['size-4 sm:size-7', fileTypeConfig.iconColor]" />
           </div>
-          <p class="mt-1 sm:mt-3 max-w-full truncate text-center text-xs font-medium text-neutral-600 dark:text-neutral-400">
+          <p
+            class="mt-1 max-w-full truncate text-center text-xs font-medium text-neutral-600 sm:mt-3 dark:text-neutral-400"
+          >
             {{ getFileExtension(file.name) }}
           </p>
         </div>
@@ -174,6 +178,7 @@ interface Props {
   previewUrl: string
   isSelected?: boolean
   hideRemoveButton?: boolean
+  class?: string // 添加 class 属性支持
 }
 
 const props = withDefaults(defineProps<Props>(), {

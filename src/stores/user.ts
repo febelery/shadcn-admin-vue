@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { loginApi, verifyOtpApi, getCurrentUserApi } from '@/api/users'
+import { getCurrentUserApi, loginApi, verifyOtpApi } from '@/api/users'
 import type { User } from '@/api/users'
 import { getFingerprint } from '@/lib/utils'
 
@@ -54,9 +54,9 @@ export const useUserStore = defineStore('user', {
     hasPermission: (state) => {
       return (permission: string | string[]) => {
         if (!state.userInfo?.permissions) return false
-        
+
         if (Array.isArray(permission)) {
-          return permission.some(p => state.userInfo!.permissions.includes(p))
+          return permission.some((p) => state.userInfo!.permissions.includes(p))
         }
         return state.userInfo.permissions.includes(permission)
       }
@@ -65,14 +65,14 @@ export const useUserStore = defineStore('user', {
     hasAnyPermission: (state) => {
       return (permissions: string[]) => {
         if (!state.userInfo?.permissions) return false
-        return permissions.some(permission => state.userInfo!.permissions.includes(permission))
+        return permissions.some((permission) => state.userInfo!.permissions.includes(permission))
       }
     },
 
     hasAllPermissions: (state) => {
       return (permissions: string[]) => {
         if (!state.userInfo?.permissions) return false
-        return permissions.every(permission => state.userInfo!.permissions.includes(permission))
+        return permissions.every((permission) => state.userInfo!.permissions.includes(permission))
       }
     },
   },

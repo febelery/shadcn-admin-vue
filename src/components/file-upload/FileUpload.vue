@@ -12,14 +12,14 @@
     >
       <!-- 文件预览区域 - 只有当有文件时才显示 -->
       <div v-if="files.length > 0" class="relative w-full">
-        <!-- 单文件模式预览 -->
+        <!-- 单文件模式预览 - 铺满容器，无边框 -->
         <div v-if="props.maxFiles === 1" class="w-full">
           <Motion
             :key="`file-${0}`"
             :initial="{ opacity: 0, scale: 0.8 }"
             :animate="{ opacity: 1, scale: 1 }"
             :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
-            class="mx-auto w-full max-w-sm"
+            class="w-full"
           >
             <FileThumbnail
               :file="files[0]"
@@ -28,12 +28,16 @@
               @click="openPreview(files[0], 0)"
               @remove="removeFile(0)"
               @retry="retryUpload(files[0])"
+              class="aspect-video w-full overflow-hidden rounded-xl border-0"
             />
           </Motion>
         </div>
 
         <!-- 多文件模式网格布局 - 响应式网格 -->
-        <div v-else class="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div
+          v-else
+          class="xs:grid-cols-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        >
           <Motion
             v-for="(file, idx) in files"
             :key="`file-${idx}`"
@@ -131,6 +135,8 @@ const {
   currentFile,
   currentFileIndex,
   showPasteHint,
+  validUploadedCount,
+  hasFailedUploads,
   handleFileChange,
   uploadFile,
   retryUpload,
@@ -164,6 +170,16 @@ watch(
 )
 
 function handleClick() {
+  // 单文件模式：如果已有文件，不允许点击上传
+  if (props.maxFiles === 1 && files.value.length > 0) {
+    return
+  }
+
+  // 多文件模式：检查是否达到上限
+  if (props.maxFiles > 1 && isUploadDisabled.value) {
+    return
+  }
+
   fileInputRef.value?.click()
 }
 
@@ -176,13 +192,31 @@ function onFileChange(e: Event) {
 }
 
 function handleDrop(files: File[]) {
+  // 单文件模式：如果已有文件，不允许拖拽上传
+  if (props.maxFiles === 1 && files.length > 0) {
+    return
+  }
+
   if (files.length) handleFileChange(files)
 }
 
 function handlePaste(files: File[]) {
+  // 单文件模式：如果已有文件，不允许粘贴上传
+  if (props.maxFiles === 1 && files.length > 0) {
+    return
+  }
+
   if (files.length) {
     handleFileChange(files)
     showPasteSuccess()
   }
 }
+
+// 暴露给父组件的方法和属性，用于验证
+defineExpose({
+  validUploadedCount,
+  hasFailedUploads,
+  files,
+  isUploading,
+})
 </script>

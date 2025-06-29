@@ -45,13 +45,25 @@ export function useFileUpload(options: {
     return files.value[currentFileIndex.value]
   })
 
+  // 计算有效的上传文件数量（只计算上传成功的文件）
+  const validUploadedCount = computed(() => {
+    return files.value.filter((file) => file.progress.status === FileUploadStatus.SUCCESS).length
+  })
+
+  // 计算是否有上传失败的文件
+  const hasFailedUploads = computed(() => {
+    return files.value.some((file) => file.progress.status === FileUploadStatus.ERROR)
+  })
+
   watch(
     () => modelValue,
     async (newValue) => {
       // 只有当 modelValue 有值且不为空时才加载
-      if (newValue && 
-          ((typeof newValue === 'string' && newValue.trim() !== '') || 
-           (Array.isArray(newValue) && newValue.length > 0 && newValue.some(url => url.trim() !== '')))) {
+      if (
+        newValue &&
+        ((typeof newValue === 'string' && newValue.trim() !== '') ||
+          (Array.isArray(newValue) && newValue.some((url) => url.trim() !== '')))
+      ) {
         await loadUrlsFromModel(newValue)
       } else {
         // 如果 modelValue 为空，清空文件列表
@@ -68,8 +80,10 @@ export function useFileUpload(options: {
       return
     }
 
-    const urlList = Array.isArray(urls) ? urls.filter(url => url && url.trim() !== '') : [urls].filter(url => url && url.trim() !== '')
-    
+    const urlList = Array.isArray(urls)
+      ? urls.filter((url) => url && url.trim() !== '')
+      : [urls].filter((url) => url && url.trim() !== '')
+
     // 如果过滤后没有有效的 URL，清空文件列表
     if (urlList.length === 0) {
       clearFiles()
@@ -172,6 +186,8 @@ export function useFileUpload(options: {
         },
         (error) => {
           onError?.(error)
+          // 上传失败时也要更新 modelValue，确保验证能正确反映状态
+          updateModelValue()
           checkUploadStatus()
         }
       )
@@ -205,10 +221,18 @@ export function useFileUpload(options: {
   function updateModelValue() {
     if (!onUpdateModelValue) return
 
+    // 只返回上传成功的文件 URL
+    const successfulUrls = files.value
+      .filter((file) => file.progress.status === FileUploadStatus.SUCCESS)
+      .map((_, index) => uploadedUrls.value[index])
+      .filter(Boolean)
+
     if (maxFiles === 1) {
-      onUpdateModelValue(uploadedUrls.value[0] || '')
+      // 单文件模式：如果没有成功上传的文件，返回空字符串
+      onUpdateModelValue(successfulUrls[0] || '')
     } else {
-      onUpdateModelValue([...uploadedUrls.value])
+      // 多文件模式：返回成功上传的文件数组
+      onUpdateModelValue(successfulUrls)
     }
   }
 
@@ -222,13 +246,17 @@ export function useFileUpload(options: {
       filePreviewUrls.value.delete(fileToRemove)
     }
 
-    const fileUrl = uploadedUrls.value[index]
-    if (fileUrl) {
-      uploadedUrls.value = uploadedUrls.value.filter((url) => url !== fileUrl)
+    // 如果是成功上传的文件，从 uploadedUrls 中移除对应的 URL
+    if (fileToRemove.progress.status === FileUploadStatus.SUCCESS) {
+      const fileUrl = uploadedUrls.value[index]
+      if (fileUrl) {
+        uploadedUrls.value = uploadedUrls.value.filter((url) => url !== fileUrl)
+      }
     }
 
     files.value = files.value.filter((_, i) => i !== index)
 
+    // 移除文件后立即更新 modelValue
     updateModelValue()
 
     if (previewOpen.value && currentFileIndex.value === index) {
@@ -250,6 +278,9 @@ export function useFileUpload(options: {
 
     files.value = []
     uploadedUrls.value = []
+
+    // 清空文件后立即更新 modelValue
+    updateModelValue()
   }
 
   function openPreview(file: UploadFile, index: number) {
@@ -316,6 +347,8 @@ export function useFileUpload(options: {
     currentFile,
     currentFileIndex,
     showPasteHint,
+    validUploadedCount,
+    hasFailedUploads,
 
     handleFileChange,
     uploadFile,

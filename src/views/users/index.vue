@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-vue-next'
+import { Edit, Eye, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-vue-next'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { getUsersApi, deleteUserApi } from '@/api/users'
+import { deleteUserApi, getUsersApi } from '@/api/users'
 import type { User, UserListParams } from '@/api/users'
 
 const router = useRouter()
@@ -136,14 +136,9 @@ const navigateToEdit = (id: number) => {
     <Card>
       <CardHeader>
         <div class="flex items-center gap-4">
-          <div class="relative flex-1 max-w-sm">
-            <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              v-model="searchQuery"
-              placeholder="搜索用户..."
-              class="pl-9"
-              @keyup.enter="handleSearch"
-            />
+          <div class="relative max-w-sm flex-1">
+            <Search class="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Input v-model="searchQuery" placeholder="搜索用户..." class="pl-9" @keyup.enter="handleSearch" />
           </div>
           <Select v-model="selectedRole" @update:model-value="handleFilter">
             <SelectTrigger class="w-32">
@@ -180,11 +175,13 @@ const navigateToEdit = (id: number) => {
       <CardContent>
         <div v-if="loading" class="flex items-center justify-center py-8">
           <div class="text-center">
-            <div class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <div
+              class="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
+            ></div>
             <p class="text-muted-foreground text-sm">正在加载...</p>
           </div>
         </div>
-        
+
         <Table v-else>
           <TableHeader>
             <TableRow>
@@ -203,7 +200,7 @@ const navigateToEdit = (id: number) => {
               <TableCell>
                 <div class="flex items-center gap-3">
                   <Avatar class="h-8 w-8">
-                    <AvatarImage :src="user.avatar" :alt="user.name" />
+                    <AvatarImage :src="user.avatar as string" :alt="user.name" />
                     <AvatarFallback>{{ user.name.charAt(0) }}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -212,7 +209,7 @@ const navigateToEdit = (id: number) => {
                 </div>
               </TableCell>
               <TableCell>
-                <code class="text-sm bg-muted px-1.5 py-0.5 rounded">{{ user.username }}</code>
+                <code class="bg-muted rounded px-1.5 py-0.5 text-sm">{{ user.username }}</code>
               </TableCell>
               <TableCell>{{ user.email }}</TableCell>
               <TableCell>
@@ -242,10 +239,7 @@ const navigateToEdit = (id: number) => {
                       编辑
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      variant="destructive" 
-                      @click="deleteUser(user.id, user.name)"
-                    >
+                    <DropdownMenuItem variant="destructive" @click="deleteUser(user.id, user.name)">
                       <Trash2 class="mr-2 h-4 w-4" />
                       删除
                     </DropdownMenuItem>
@@ -258,25 +252,35 @@ const navigateToEdit = (id: number) => {
 
         <!-- 分页 -->
         <div v-if="pagination.total > pagination.pageSize" class="mt-4 flex items-center justify-between">
-          <div class="text-sm text-muted-foreground">
-            显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} - 
-            {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }} 
+          <div class="text-muted-foreground text-sm">
+            显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} -
+            {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }}
             共 {{ pagination.total }} 条
           </div>
           <div class="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               :disabled="pagination.page <= 1"
-              @click="pagination.page--; fetchUsers()"
+              @click="
+                () => {
+                  pagination.page--
+                  fetchUsers()
+                }
+              "
             >
               上一页
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               :disabled="pagination.page >= Math.ceil(pagination.total / pagination.pageSize)"
-              @click="pagination.page++; fetchUsers()"
+              @click="
+                () => {
+                  pagination.page++
+                  fetchUsers()
+                }
+              "
             >
               下一页
             </Button>

@@ -1,22 +1,31 @@
-import type { Component, InputHTMLAttributes } from 'vue'
-import type * as z from 'zod'
-import type { INPUT_COMPONENTS } from './constant'
-
-export interface FieldProps {
-  fieldName: string
-  label?: string
-  required?: boolean
-  config?: ConfigItem
-  disabled?: boolean
-}
+import type { z } from 'zod'
+import type { Component } from 'vue'
 
 export interface Shape {
   type: string
   default?: any
   required?: boolean
   options?: string[]
-  schema?: ZodAny
+  schema?: z.ZodTypeAny
 }
+
+export interface FieldProps {
+  fieldName: string
+  label?: string
+  required?: boolean
+  disabled?: boolean
+  config?: ConfigItem
+}
+
+export interface ConfigItem {
+  component?: keyof InputComponents | Component
+  label?: string
+  description?: string
+  hideLabel?: boolean
+  inputProps?: Record<string, any>
+}
+
+export type Config<T> = Partial<Record<keyof T, ConfigItem>>
 
 export interface InputComponents {
   date: Component
@@ -34,76 +43,19 @@ export interface InputComponents {
   editor: Component
 }
 
-export interface ConfigItem {
-  /** Value for the `FormLabel` */
-  label?: string
-  /** Value for the `FormDescription` */
-  description?: string
-  /** Pick which component to be rendered. */
-  component?: keyof typeof INPUT_COMPONENTS | Component
-  /** Hide `FormLabel`. */
-  hideLabel?: boolean
-  inputProps?: InputHTMLAttributes & {
-    // Editor 相关属性
-    mode?: 'full' | 'lite' | 'pure'
-    // FileUpload 相关属性
-    maxFiles?: number
-    acceptedTypes?: string | string[]
-    maxSize?: number
-    autoUpload?: boolean
-    useQiniu?: boolean
-    // 通用属性
-    class?: string
-    disabled?: boolean
-  }
-}
-
-// Define a type to unwrap an array
-type UnwrapArray<T> = T extends (infer U)[] ? U : never
-
-export type Config<SchemaType extends object> = {
-  // If SchemaType.key is an object, create a nested Config, otherwise ConfigItem
-  [Key in keyof SchemaType]?:
-  SchemaType[Key] extends any[]
-    ? UnwrapArray<Config<SchemaType[Key]>>
-    : SchemaType[Key] extends object
-      ? Config<SchemaType[Key]>
-      : ConfigItem;
+export interface Dependency<T> {
+  sourceField: keyof T
+  targetField: keyof T
+  when: (sourceValue: any, targetValue: any) => boolean
+  type: DependencyType
+  options?: EnumValues
 }
 
 export enum DependencyType {
-  DISABLES,
-  REQUIRES,
-  HIDES,
-  SETS_OPTIONS,
+  DISABLES = 'disables',
+  REQUIRES = 'requires',
+  HIDES = 'hides',
+  SETS_OPTIONS = 'sets_options',
 }
 
-interface BaseDependency<SchemaType extends z.infer<z.ZodObject<any, any>>> {
-  sourceField: keyof SchemaType
-  type: DependencyType
-  targetField: keyof SchemaType
-  when: (sourceFieldValue: any, targetFieldValue: any) => boolean
-}
-
-export type ValueDependency<SchemaType extends z.infer<z.ZodObject<any, any>>> =
-  BaseDependency<SchemaType> & {
-    type:
-      | DependencyType.DISABLES
-      | DependencyType.REQUIRES
-      | DependencyType.HIDES
-  }
-
-export type EnumValues = readonly [string, ...string[]]
-
-export type OptionsDependency<
-  SchemaType extends z.infer<z.ZodObject<any, any>>,
-> = BaseDependency<SchemaType> & {
-  type: DependencyType.SETS_OPTIONS
-
-  // Partial array of values from sourceField that will trigger the dependency
-  options: EnumValues
-}
-
-export type Dependency<SchemaType extends z.infer<z.ZodObject<any, any>>> =
-  | ValueDependency<SchemaType>
-  | OptionsDependency<SchemaType>
+export type EnumValues = readonly string[]

@@ -8,13 +8,13 @@ import type { MenuItem, RouteMeta } from '@/types/menu'
  */
 function shouldShowInMenu(route: RouteRecordRaw): boolean {
   const meta = route.meta as RouteMeta
-  
+
   // 1. 必须有标题
   if (!meta?.title) return false
-  
+
   // 2. 明确标记为隐藏的不显示
   if (meta.hideInMenu) return false
-  
+
   return true
 }
 
@@ -28,7 +28,7 @@ function isMenuRoot(route: RouteRecordRaw): boolean {
   const pathSegments = route.path.split('/').filter(Boolean)
   const isTopLevel = pathSegments.length === 1
   const hasChildren = route.children && route.children.length > 0
-  
+
   return isTopLevel && hasChildren
 }
 
@@ -40,8 +40,8 @@ function isMenuRoot(route: RouteRecordRaw): boolean {
  */
 function processRouteChildren(children: RouteRecordRaw[], parentPath: string): MenuItem[] {
   const menuItems: MenuItem[] = []
-  
-  children.forEach(child => {
+
+  children.forEach((child) => {
     // 检查是否应该显示在菜单中
     if (!shouldShowInMenu(child)) {
       return
@@ -49,7 +49,7 @@ function processRouteChildren(children: RouteRecordRaw[], parentPath: string): M
 
     const childMeta = child.meta as RouteMeta
     const childPath = child.path === '' ? parentPath : `${parentPath}/${child.path}`
-    
+
     const childMenuItem: MenuItem = {
       title: childMeta.title!,
       url: childPath,
@@ -76,7 +76,7 @@ function processRouteChildren(children: RouteRecordRaw[], parentPath: string): M
 
   // 对菜单项排序
   menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
-  
+
   return menuItems
 }
 
@@ -87,16 +87,16 @@ function processRouteChildren(children: RouteRecordRaw[], parentPath: string): M
  */
 export function generateMenuFromRoutes(routes: RouteRecordRaw[]): MenuItem[] {
   const menuItems: MenuItem[] = []
-  
+
   // 只处理菜单根节点
-  const menuRoots = routes.filter(route => {
+  const menuRoots = routes.filter((route) => {
     return shouldShowInMenu(route) && isMenuRoot(route)
   })
-  
+
   // 处理每个菜单根节点
-  menuRoots.forEach(route => {
+  menuRoots.forEach((route) => {
     const meta = route.meta as RouteMeta
-    
+
     const parentMenuItem: MenuItem = {
       title: meta.title!,
       url: route.path,
@@ -124,7 +124,7 @@ export function generateMenuFromRoutes(routes: RouteRecordRaw[]): MenuItem[] {
 
   // 对顶级菜单排序
   menuItems.sort((a, b) => (a.order || 0) - (b.order || 0))
-  
+
   return menuItems
 }
 
@@ -140,8 +140,8 @@ export function filterMenuByPermissions(menuItems: MenuItem[], userPermissions: 
       // 检查权限
       if (item.permission) {
         const permissions = Array.isArray(item.permission) ? item.permission : [item.permission]
-        const hasPermission = permissions.some(permission => userPermissions.includes(permission))
-        
+        const hasPermission = permissions.some((permission) => userPermissions.includes(permission))
+
         if (!hasPermission) {
           // 如果没有权限，检查是否有子菜单有权限
           if (item.items && item.items.length > 0) {
@@ -151,7 +151,7 @@ export function filterMenuByPermissions(menuItems: MenuItem[], userPermissions: 
           return false
         }
       }
-      
+
       return true
     })
     .map((item) => ({
@@ -167,7 +167,7 @@ export function filterMenuByPermissions(menuItems: MenuItem[], userPermissions: 
  */
 export function groupMenuItems(menuItems: MenuItem[]): Record<string, MenuItem[]> {
   const grouped: Record<string, MenuItem[]> = {}
-  
+
   menuItems.forEach((item) => {
     const group = item.group || 'default'
     if (!grouped[group]) {
@@ -175,7 +175,7 @@ export function groupMenuItems(menuItems: MenuItem[]): Record<string, MenuItem[]
     }
     grouped[group].push(item)
   })
-  
+
   return grouped
 }
 
@@ -187,27 +187,27 @@ export function groupMenuItems(menuItems: MenuItem[]): Record<string, MenuItem[]
  */
 export function findActiveMenuPath(menuItems: MenuItem[], currentPath: string): string[] {
   const path: string[] = []
-  
+
   function findPath(items: MenuItem[], targetPath: string, currentPath: string[] = []): boolean {
     for (const item of items) {
       const itemPath = [...currentPath, item.url]
-      
+
       // 精确匹配或路径包含匹配
       if (item.url === targetPath || targetPath.startsWith(item.url + '/')) {
         path.push(...itemPath)
         return true
       }
-      
+
       if (item.items && item.items.length > 0) {
         if (findPath(item.items, targetPath, itemPath)) {
           return true
         }
       }
     }
-    
+
     return false
   }
-  
+
   findPath(menuItems, currentPath)
   return path
 }
@@ -219,15 +219,15 @@ export function findActiveMenuPath(menuItems: MenuItem[], currentPath: string): 
  */
 export function setMenuActiveState(menuItems: MenuItem[], currentPath: string): void {
   function setActive(items: MenuItem[], path: string): void {
-    items.forEach(item => {
+    items.forEach((item) => {
       // 精确匹配或路径包含匹配
       item.isActive = item.url === path || path.startsWith(item.url + '/')
-      
+
       if (item.items) {
         setActive(item.items, path)
       }
     })
   }
-  
+
   setActive(menuItems, currentPath)
 }

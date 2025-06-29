@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { CircleHelp, Command, Settings } from 'lucide-vue-next'
 import { onMounted } from 'vue'
-import type { SidebarProps } from '@/components/ui/sidebar'
 import LockScreen from '@/components/LockScreen.vue'
+import type { SidebarProps } from '@/components/ui/sidebar'
 import PageLayout from '@/layout/page/PageLayout.vue'
 import { useUserStore } from '@/stores/user'
 import NavMain from './NavMenu.vue'
@@ -79,7 +79,7 @@ const data = {
       <SiteHeader />
       <PageLayout />
     </SidebarInset>
-    
+
     <!-- 锁屏组件 -->
     <LockScreen />
   </SidebarProvider>

@@ -12,12 +12,8 @@ const props = defineProps<{
     <template v-for="item in items" :key="item.title">
       <!-- 没有子项的菜单项 -->
       <SidebarMenuSubItem v-if="!item.items || item.items.length === 0">
-        <SidebarMenuSubButton 
-          as-child 
-          :data-active="item.isActive"
-          :disabled="item.disabled"
-        >
-          <router-link 
+        <SidebarMenuSubButton as-child :data-active="item.isActive" :disabled="item.disabled">
+          <router-link
             :to="item.url"
             :target="item.target"
             :class="{ 'pointer-events-none opacity-50': item.disabled }"
@@ -38,10 +34,7 @@ const props = defineProps<{
       >
         <SidebarMenuSubItem>
           <CollapsibleTrigger as-child>
-            <SidebarMenuSubButton 
-              :class="getMenuActiveState(item) && ''"
-              :disabled="item.disabled"
-            >
+            <SidebarMenuSubButton :class="getMenuActiveState(item) && ''" :disabled="item.disabled">
               <component :is="item.icon" v-if="item.icon" />
               <span>{{ item.title }}</span>
               <SidebarMenuBadge v-if="item.badge">{{ item.badge }}</SidebarMenuBadge>
