@@ -11,12 +11,12 @@
       <div class="relative z-10 flex h-full w-full items-center justify-center">
         <!-- 图片预览 -->
         <div
-          v-if="file && isImageFile(file)"
+          v-if="currentFile && isImageFile(currentFile)"
           class="flex h-full w-full items-center justify-center"
           @wheel="handleWheel"
         >
           <img
-            :src="fileUrl"
+            :src="currentFileUrl"
             :style="{
               transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) scale(${zoom}) rotate(${rotation}deg)`,
               maxHeight: isFullscreen ? '100vh' : '90vh',
@@ -33,34 +33,34 @@
         </div>
 
         <!-- 视频预览 -->
-        <div v-else-if="file && isVideoFile(file)" class="flex h-full w-full items-center justify-center">
-          <video :src="fileUrl" class="max-h-[90vh] max-w-full" controls autoplay></video>
+        <div v-else-if="currentFile && isVideoFile(currentFile)" class="flex h-full w-full items-center justify-center">
+          <video :src="currentFileUrl" class="max-h-[90vh] max-w-full" controls autoplay></video>
         </div>
 
         <!-- Excel 预览 -->
-        <div v-else-if="file && isExcelFile(file)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
-          <ExcelPreview :file="file" :file-url="fileUrl" />
+        <div v-else-if="currentFile && isExcelFile(currentFile)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
+          <ExcelPreview :file="currentFile" :file-url="currentFileUrl" />
         </div>
 
         <!-- Word 文档预览 -->
-        <div v-else-if="file && isWordFile(file)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
-          <DocxPreview :file="file" :file-url="fileUrl" />
+        <div v-else-if="currentFile && isWordFile(currentFile)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
+          <DocxPreview :file="currentFile" :file-url="currentFileUrl" />
         </div>
 
         <!-- 非可预览文件 -->
         <div v-else class="flex flex-col items-center justify-center text-white">
           <div class="mb-8 flex h-32 w-32 items-center justify-center rounded-full bg-white/10">
-            <component :is="getFileIcon(file)" class="size-16 text-white" />
+            <component :is="getFileIcon(currentFile)" class="size-16 text-white" />
           </div>
           <p class="text-lg">此文件类型不支持预览</p>
           <p class="mt-2 text-sm text-gray-400">
-            {{ file?.type || '未知类型' }}
+            {{ currentFile?.type || '未知类型' }}
           </p>
           <p
-            @click="copyImageUrl"
+            @click="copyFileUrl"
             class="mt-2 w-full cursor-pointer rounded-lg border border-gray-700 bg-gray-800 p-2 text-sm text-white"
           >
-            {{ fileUrl || '未知类型' }}
+            {{ currentFileUrl || '未知类型' }}
           </p>
 
           <!-- 在新标签页打开按钮 -->
@@ -76,7 +76,7 @@
 
       <!-- 顶部工具栏 -->
       <div class="absolute top-0 right-0 left-0 z-20 flex items-center justify-between p-4 text-white">
-        <h3 class="max-w-md truncate text-lg font-medium opacity-80">{{ file?.name }}</h3>
+        <h3 class="max-w-md truncate text-lg font-medium opacity-80">{{ currentFile?.name }}</h3>
         <div class="flex items-center gap-2">
           <button @click="close" class="rounded-full p-2 transition-colors hover:bg-white/10">
             <X class="size-5" />
@@ -109,7 +109,7 @@
         class="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/40 px-4 py-2 backdrop-blur-md"
       >
         <!-- 仅对图片显示缩放和旋转控制 -->
-        <template v-if="file && isImageFile(file)">
+        <template v-if="currentFile && isImageFile(currentFile)">
           <button
             @click="zoom = Math.max(0.1, zoom - 0.1)"
             class="rounded-full p-2 text-white transition-all hover:bg-white/20"
@@ -142,8 +142,8 @@
           <Download class="size-5" />
         </button>
 
-        <!-- 复制图片URL按钮 -->
-        <button @click="copyImageUrl" class="rounded-full p-2 text-white transition-all hover:bg-white/20">
+        <!-- 复制文件URL按钮 -->
+        <button @click="copyFileUrl" class="rounded-full p-2 text-white transition-all hover:bg-white/20">
           <component :is="copied ? Check : Copy" class="size-5" />
         </button>
       </div>
@@ -153,7 +153,7 @@
         v-if="showCopiedToast"
         class="absolute bottom-20 left-1/2 z-20 -translate-x-1/2 rounded-lg bg-green-600 px-4 py-2 text-sm text-white shadow-lg"
       >
-        已复制图片链接
+        已复制文件链接
       </div>
 
       <!-- 文件信息提示 -->
@@ -161,8 +161,8 @@
         v-if="showInfo"
         class="fixed right-6 bottom-6 z-20 max-w-xs rounded-lg bg-black/40 p-3 text-sm text-white backdrop-blur-md"
       >
-        <p class="text-white/80">{{ file ? formatFileSize(file.size) : '' }}</p>
-        <p class="text-white/80">修改于 {{ file ? new Date(file.lastModified).toLocaleString() : '' }}</p>
+        <p class="text-white/80">{{ currentFile ? formatFileSize(currentFile.size) : '' }}</p>
+        <p class="text-white/80">修改于 {{ currentFile ? new Date(currentFile.lastModified).toLocaleString() : '' }}</p>
       </div>
     </div>
   </Teleport>
@@ -189,25 +189,32 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-vue-next'
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch, computed } from 'vue'
 import DocxPreview from './DocxPreview.vue'
 import ExcelPreview from './ExcelPreview.vue'
 import { formatFileSize, isExcelFile, isImageFile, isVideoFile, isWordFile } from './fileUtils'
 
-interface Props {
-  isOpen: boolean
-  file: File | null
-  fileUrl: string
-  currentIndex: number
-  totalFiles: number
+export interface FilePreviewItem {
+  file: File
+  url: string
 }
 
-const props = defineProps<Props>()
+interface Props {
+  isOpen: boolean
+  files: FilePreviewItem[]
+  currentIndex: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isOpen: false,
+  files: () => [],
+  currentIndex: 0,
+})
 
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'navigate', direction: 'prev' | 'next'): void
-  (e: 'download'): void
+  (e: 'download', file: File, url: string): void
 }>()
 
 const { copy, copied } = useClipboard({ copiedDuring: 2000 })
@@ -222,6 +229,19 @@ const isDragging = ref(false)
 const dragStartPos = ref({ x: 0, y: 0 })
 const dragOffset = ref({ x: 0, y: 0 })
 
+// 计算属性
+const currentFile = computed(() => {
+  return props.files[props.currentIndex]?.file || null
+})
+
+const currentFileUrl = computed(() => {
+  return props.files[props.currentIndex]?.url || ''
+})
+
+const totalFiles = computed(() => {
+  return props.files.length
+})
+
 function close() {
   emit('close')
 }
@@ -233,7 +253,9 @@ function navigate(direction: 'prev' | 'next') {
 }
 
 function download() {
-  emit('download')
+  if (currentFile.value && currentFileUrl.value) {
+    emit('download', currentFile.value, currentFileUrl.value)
+  }
 }
 
 function getFileIcon(file: File | null) {
@@ -263,22 +285,22 @@ function handleKeyEvents(e: KeyboardEvent) {
       e.preventDefault()
     }
   } else if (e.key === 'ArrowRight') {
-    if (props.currentIndex < props.totalFiles - 1) {
+    if (props.currentIndex < totalFiles.value - 1) {
       navigate('next')
       e.preventDefault()
     }
   } else if (e.key === '+' || e.key === '=') {
-    if (props.file && isImageFile(props.file)) {
+    if (currentFile.value && isImageFile(currentFile.value)) {
       zoom.value = Math.min(5, zoom.value + 0.1)
       e.preventDefault()
     }
   } else if (e.key === '-') {
-    if (props.file && isImageFile(props.file)) {
+    if (currentFile.value && isImageFile(currentFile.value)) {
       zoom.value = Math.max(0.1, zoom.value - 0.1)
       e.preventDefault()
     }
   } else if (e.key === 'r') {
-    if (props.file && isImageFile(props.file)) {
+    if (currentFile.value && isImageFile(currentFile.value)) {
       rotation.value = (rotation.value + 90) % 360
       e.preventDefault()
     }
@@ -295,7 +317,7 @@ function handleKeyEvents(e: KeyboardEvent) {
 }
 
 function handleWheel(e: WheelEvent) {
-  if (props.file && isImageFile(props.file)) {
+  if (currentFile.value && isImageFile(currentFile.value)) {
     // 防止页面滚动
     e.preventDefault()
 
@@ -307,7 +329,7 @@ function handleWheel(e: WheelEvent) {
 
 // 拖拽图片功能
 function startDrag(e: MouseEvent) {
-  if (props.file && isImageFile(props.file)) {
+  if (currentFile.value && isImageFile(currentFile.value)) {
     isDragging.value = true
     dragStartPos.value = { x: e.clientX, y: e.clientY }
   }
@@ -327,10 +349,10 @@ function stopDrag() {
   isDragging.value = false
 }
 
-// 复制图片URL
-function copyImageUrl() {
-  if (props.fileUrl) {
-    copy(props.fileUrl)
+// 复制文件URL
+function copyFileUrl() {
+  if (currentFileUrl.value) {
+    copy(currentFileUrl.value)
     showCopiedToast.value = true
     setTimeout(() => {
       showCopiedToast.value = false
@@ -340,8 +362,8 @@ function copyImageUrl() {
 
 // 在新标签页打开URL
 function openInNewTab() {
-  if (props.fileUrl) {
-    window.open(props.fileUrl, '_blank')
+  if (currentFileUrl.value) {
+    window.open(currentFileUrl.value, '_blank')
   }
 }
 
@@ -356,14 +378,14 @@ onMounted(() => {
     document.documentElement.style.overflow = ''
   })
 
-  if ((props.file?.size || 0) > 0) {
+  if ((currentFile.value?.size || 0) > 0) {
     showInfo.value = true
   }
 })
 
 // 当文件改变时重置视图
 watch(
-  () => props.file,
+  () => props.currentIndex,
   () => {
     resetView()
   }

@@ -71,10 +71,8 @@
     <!-- 预览组件 -->
     <FilePreview
       :is-open="previewOpen"
-      :file="currentFile"
-      :file-url="currentFile ? getFilePreview(currentFile) : ''"
+      :files="previewFiles"
       :current-index="currentFileIndex ?? 0"
-      :total-files="files.length"
       @close="closePreview"
       @navigate="handlePreviewNavigation"
       @download="downloadFile"
@@ -85,9 +83,9 @@
 <script lang="ts" setup>
 import { Motion } from 'motion-v'
 import type { HTMLAttributes } from 'vue'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { cn } from '@/lib/utils'
-import FilePreview from './FilePreview.vue'
+import { FilePreview, type FilePreviewItem } from '@/components/file-preview'
 import FileThumbnail from './FileThumbnail.vue'
 import FileUploadZone from './FileUploadZone.vue'
 import { formatAcceptedTypes } from './fileUtils'
@@ -157,6 +155,14 @@ const {
   onUpdateModelValue: (value) => emit('update:modelValue', value),
   onProgress: (percentage) => emit('onProgress', percentage),
   onError: (error) => emit('onError', error),
+})
+
+// 为预览组件准备数据
+const previewFiles = computed((): FilePreviewItem[] => {
+  return files.value.map(file => ({
+    file,
+    url: getFilePreview(file)
+  }))
 })
 
 // 监听maxFiles和acceptedTypes变化
