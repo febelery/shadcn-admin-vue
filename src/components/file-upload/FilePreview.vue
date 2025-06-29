@@ -38,11 +38,13 @@
         </div>
 
         <!-- Excel 预览 -->
-        <div
-          v-else-if="file && isExcelFile(file)"
-          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center rounded-lg bg-white p-4"
-        >
+        <div v-else-if="file && isExcelFile(file)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
           <ExcelPreview :file="file" :file-url="fileUrl" />
+        </div>
+
+        <!-- Word 文档预览 -->
+        <div v-else-if="file && isWordFile(file)" class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center">
+          <DocxPreview :file="file" :file-url="fileUrl" />
         </div>
 
         <!-- 非可预览文件 -->
@@ -188,8 +190,9 @@ import {
   ZoomOut,
 } from 'lucide-vue-next'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import DocxPreview from './DocxPreview.vue'
 import ExcelPreview from './ExcelPreview.vue'
-import { formatFileSize, isExcelFile, isImageFile, isVideoFile } from './fileUtils'
+import { formatFileSize, isExcelFile, isImageFile, isVideoFile, isWordFile } from './fileUtils'
 
 interface Props {
   isOpen: boolean

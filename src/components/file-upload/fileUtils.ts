@@ -215,11 +215,28 @@ export function isVideoFile(file: File): boolean {
   return file.type.startsWith('video/')
 }
 
+/**
+ * 检查是否为 Excel 文件
+ * @param file 文件对象
+ * @returns 是否为 Excel 文件
+ */
 export function isExcelFile(file: File): boolean {
-  return (
-    file.type === 'application/vnd.ms-excel' ||
-    file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  )
+  const excelTypes = [
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/csv',
+  ]
+  return excelTypes.includes(file.type) || file.name.match(/\.(xlsx?|csv)$/i) !== null
+}
+
+/**
+ * 检查是否为 Word 文档文件
+ * @param file 文件对象
+ * @returns 是否为 Word 文档
+ */
+export function isWordFile(file: File): boolean {
+  const wordTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  return wordTypes.includes(file.type) || file.name.match(/\.docx?$/i) !== null
 }
 
 /**

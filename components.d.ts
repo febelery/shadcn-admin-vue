@@ -64,6 +64,7 @@ declare module 'vue' {
     ConfettiButton: typeof import('./src/components/ui/confetti/ConfettiButton.vue')['default']
     DefaultCursor: typeof import('./src/components/ui/smooth-cursor/DefaultCursor.vue')['default']
     DirectionAwareHover: typeof import('./src/components/ui/direction-aware-hover/DirectionAwareHover.vue')['default']
+    DocxPreview: typeof import('./src/components/file-upload/DocxPreview.vue')['default']
     DropdownMenu: typeof import('./src/components/ui/dropdown-menu/DropdownMenu.vue')['default']
     DropdownMenuCheckboxItem: typeof import('./src/components/ui/dropdown-menu/DropdownMenuCheckboxItem.vue')['default']
     DropdownMenuContent: typeof import('./src/components/ui/dropdown-menu/DropdownMenuContent.vue')['default']
