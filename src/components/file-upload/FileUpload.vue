@@ -75,7 +75,7 @@
       :current-index="currentFileIndex ?? 0"
       @close="closePreview"
       @navigate="handlePreviewNavigation"
-      @download="downloadFile"
+      @download="(file, url) => downloadFile(files.find((f) => f.name === file.name))"
     />
   </div>
 </template>
