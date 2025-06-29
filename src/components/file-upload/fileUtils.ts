@@ -215,6 +215,13 @@ export function isVideoFile(file: File): boolean {
   return file.type.startsWith('video/')
 }
 
+export function isExcelFile(file: File): boolean {
+  return (
+    file.type === 'application/vnd.ms-excel' ||
+    file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  )
+}
+
 /**
  * 获取文件扩展名
  */

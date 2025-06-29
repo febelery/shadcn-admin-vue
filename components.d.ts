@@ -79,6 +79,7 @@ declare module 'vue' {
     DropdownMenuSubTrigger: typeof import('./src/components/ui/dropdown-menu/DropdownMenuSubTrigger.vue')['default']
     DropdownMenuTrigger: typeof import('./src/components/ui/dropdown-menu/DropdownMenuTrigger.vue')['default']
     Editor: typeof import('./src/components/editor/Editor.vue')['default']
+    ExcelPreview: typeof import('./src/components/file-upload/ExcelPreview.vue')['default']
     FilePreview: typeof import('./src/components/file-upload/FilePreview.vue')['default']
     FileThumbnail: typeof import('./src/components/file-upload/FileThumbnail.vue')['default']
     FileUpload: typeof import('./src/components/file-upload/FileUpload.vue')['default']

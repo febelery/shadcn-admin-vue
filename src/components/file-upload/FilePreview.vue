@@ -37,6 +37,14 @@
           <video :src="fileUrl" class="max-h-[90vh] max-w-full" controls autoplay></video>
         </div>
 
+        <!-- Excel 预览 -->
+        <div
+          v-else-if="file && isExcelFile(file)"
+          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center rounded-lg bg-white p-4"
+        >
+          <ExcelPreview :file="file" :file-url="fileUrl" />
+        </div>
+
         <!-- 非可预览文件 -->
         <div v-else class="flex flex-col items-center justify-center text-white">
           <div class="mb-8 flex h-32 w-32 items-center justify-center rounded-full bg-white/10">
@@ -180,7 +188,8 @@ import {
   ZoomOut,
 } from 'lucide-vue-next'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { formatFileSize, isImageFile, isVideoFile } from './fileUtils'
+import ExcelPreview from './ExcelPreview.vue'
+import { formatFileSize, isExcelFile, isImageFile, isVideoFile } from './fileUtils'
 
 interface Props {
   isOpen: boolean

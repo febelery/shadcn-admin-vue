@@ -29,7 +29,7 @@ const formSchema = z.object({
   attachments: z
     .array(z.string())
     .fileUpload({
-      acceptedTypes: [FileType.IMAGE_ALL, FileType.PDF, FileType.WORD_DOCX],
+      acceptedTypes: [FileType.IMAGE_ALL, FileType.DOCUMENT_ALL, FileType.VIDEO_ALL],
       maxFiles: 5,
       maxSize: 10 * 1024 * 1024, // 10MB
     })
@@ -140,7 +140,6 @@ const goBack = () => {
                 },
                 attachments: {
                   label: '附件文件',
-                  description: '文章的附件文件，支持图片和文档，最多5个文件',
                 },
                 category: {
                   label: '分类',
