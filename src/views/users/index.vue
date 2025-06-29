@@ -126,7 +126,8 @@ const navigateToEdit = (id: number) => {
         <h1 class="text-2xl font-bold tracking-tight">用户列表</h1>
         <p class="text-muted-foreground">管理系统中的所有用户账户</p>
       </div>
-      <Button @click="navigateToCreate">
+      <!-- 使用权限指令控制添加用户按钮 -->
+      <Button v-permission="'users.create'" @click="navigateToCreate">
         <Plus class="mr-2 h-4 w-4" />
         添加用户
       </Button>
@@ -182,73 +183,85 @@ const navigateToEdit = (id: number) => {
           </div>
         </div>
 
-        <Table v-else>
-          <TableHeader>
-            <TableRow>
-              <TableHead>用户</TableHead>
-              <TableHead>用户名</TableHead>
-              <TableHead>邮箱</TableHead>
-              <TableHead>角色</TableHead>
-              <TableHead>状态</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead>最后登录</TableHead>
-              <TableHead class="w-[100px]">操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="user in users" :key="user.id">
-              <TableCell>
-                <div class="flex items-center gap-3">
-                  <Avatar class="h-8 w-8">
-                    <AvatarImage :src="user.avatar as string" :alt="user.name" />
-                    <AvatarFallback>{{ user.name.charAt(0) }}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div class="font-medium">{{ user.name }}</div>
+        <!-- 使用权限包装器控制整个表格的显示 -->
+        <PermissionWrapper 
+          permission="users.view" 
+          :show-fallback="true" 
+          fallback-text="您没有权限查看用户列表"
+        >
+          <Table v-if="!loading">
+            <TableHeader>
+              <TableRow>
+                <TableHead>用户</TableHead>
+                <TableHead>用户名</TableHead>
+                <TableHead>邮箱</TableHead>
+                <TableHead>角色</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>创建时间</TableHead>
+                <TableHead>最后登录</TableHead>
+                <TableHead class="w-[100px]">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="user in users" :key="user.id">
+                <TableCell>
+                  <div class="flex items-center gap-3">
+                    <Avatar class="h-8 w-8">
+                      <AvatarImage :src="user.avatar as string" :alt="user.name" />
+                      <AvatarFallback>{{ user.name.charAt(0) }}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div class="font-medium">{{ user.name }}</div>
+                    </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <code class="bg-muted rounded px-1.5 py-0.5 text-sm">{{ user.username }}</code>
-              </TableCell>
-              <TableCell>{{ user.email }}</TableCell>
-              <TableCell>
-                <Badge :variant="getRoleBadgeVariant(user.role)">
-                  {{ getRoleText(user.role) }}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge :variant="getStatusBadgeVariant(user.status)">
-                  {{ getStatusText(user.status) }}
-                </Badge>
-              </TableCell>
-              <TableCell>{{ new Date(user.createdAt).toLocaleDateString() }}</TableCell>
-              <TableCell>
-                {{ user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '从未登录' }}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal class="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem @click="navigateToEdit(user.id)">
-                      <Edit class="mr-2 h-4 w-4" />
-                      编辑
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" @click="deleteUser(user.id, user.name)">
-                      <Trash2 class="mr-2 h-4 w-4" />
-                      删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+                </TableCell>
+                <TableCell>
+                  <code class="bg-muted rounded px-1.5 py-0.5 text-sm">{{ user.username }}</code>
+                </TableCell>
+                <TableCell>{{ user.email }}</TableCell>
+                <TableCell>
+                  <Badge :variant="getRoleBadgeVariant(user.role)">
+                    {{ getRoleText(user.role) }}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge :variant="getStatusBadgeVariant(user.status)">
+                    {{ getStatusText(user.status) }}
+                  </Badge>
+                </TableCell>
+                <TableCell>{{ new Date(user.createdAt).toLocaleDateString() }}</TableCell>
+                <TableCell>
+                  {{ user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '从未登录' }}
+                </TableCell>
+                <TableCell>
+                  <!-- 使用权限指令控制操作按钮 -->
+                  <DropdownMenu v-permission="['users.edit', 'users.delete']">
+                    <DropdownMenuTrigger as-child>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal class="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem v-permission="'users.edit'" @click="navigateToEdit(user.id)">
+                        <Edit class="mr-2 h-4 w-4" />
+                        编辑
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator v-permission:all="['users.edit', 'users.delete']" />
+                      <DropdownMenuItem 
+                        v-permission="'users.delete'" 
+                        variant="destructive" 
+                        @click="deleteUser(user.id, user.name)"
+                      >
+                        <Trash2 class="mr-2 h-4 w-4" />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </PermissionWrapper>
 
         <!-- 分页 -->
         <div v-if="pagination.total > pagination.pageSize" class="mt-4 flex items-center justify-between">

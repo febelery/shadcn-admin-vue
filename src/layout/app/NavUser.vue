@@ -106,11 +106,12 @@ const getAvatarFallback = (name: string): string => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <!-- 使用权限指令控制菜单项 -->
+            <DropdownMenuItem v-permission="'users.edit'">
               <BadgeCheck />
               账户设置
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem v-permission="'system.notifications'">
               <Bell />
               通知中心
             </DropdownMenuItem>

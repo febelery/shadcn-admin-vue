@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './api/interceptor'
 import './assets/main.css'
+import { setupDirectives } from './directives'
 // 导入 Zod 文件上传扩展
 import './lib/zod-file-extensions'
 import { setupGlobalZodMessages } from './lib/zod-messages'
@@ -27,5 +28,8 @@ const queryClient = new QueryClient({
 app.use(createPinia())
 app.use(router)
 app.use(VueQueryPlugin, { queryClient })
+
+// 注册全局指令
+setupDirectives(app)
 
 app.mount('#app')

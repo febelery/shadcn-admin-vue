@@ -156,7 +156,8 @@ const navigateToCreate = () => {
         <h1 class="text-2xl font-bold tracking-tight">文章管理</h1>
         <p class="text-muted-foreground">管理系统中的所有文章内容</p>
       </div>
-      <Button @click="navigateToCreate">
+      <!-- 使用权限指令控制写文章按钮 -->
+      <Button v-permission="'articles.create'" @click="navigateToCreate">
         <Plus class="mr-2 h-4 w-4" />
         写文章
       </Button>
@@ -206,67 +207,79 @@ const navigateToCreate = () => {
       </div>
     </div>
 
-    <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Card v-for="article in articles" :key="article.id" class="overflow-hidden">
-        <div class="aspect-video overflow-hidden">
-          <img
-            :src="article.cover"
-            :alt="article.title"
-            class="h-full w-full object-cover transition-transform hover:scale-105"
-          />
-        </div>
-        <CardHeader class="pb-3">
-          <div class="flex items-start justify-between gap-2">
-            <CardTitle class="line-clamp-2 text-lg">{{ article.title }}</CardTitle>
-            <DropdownMenu v-model:open="openDropdowns[article.id]">
-              <DropdownMenuTrigger as-child>
-                <Button variant="ghost" size="icon" class="h-8 w-8">
-                  <MoreHorizontal class="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Eye class="mr-2 h-4 w-4" />
-                  查看
-                </DropdownMenuItem>
-                <DropdownMenuItem @click="navigateToEdit(article.id)">
-                  <Edit class="mr-2 h-4 w-4" />
-                  编辑
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" @click="deleteArticle(article.id, article.title)">
-                  <Trash2 class="mr-2 h-4 w-4" />
-                  删除
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    <!-- 使用权限包装器控制文章列表的显示 -->
+    <PermissionWrapper 
+      permission="articles.view" 
+      :show-fallback="true" 
+      fallback-text="您没有权限查看文章列表"
+    >
+      <div v-if="!loading" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card v-for="article in articles" :key="article.id" class="overflow-hidden">
+          <div class="aspect-video overflow-hidden">
+            <img
+              :src="article.cover"
+              :alt="article.title"
+              class="h-full w-full object-cover transition-transform hover:scale-105"
+            />
           </div>
-          <CardDescription class="line-clamp-3">
-            {{ article.excerpt }}
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="pt-0">
-          <div class="text-muted-foreground flex items-center justify-between text-sm">
-            <div class="flex items-center gap-2">
-              <Calendar class="h-4 w-4" />
-              {{ new Date(article.publishedAt || article.createdAt).toLocaleDateString() }}
+          <CardHeader class="pb-3">
+            <div class="flex items-start justify-between gap-2">
+              <CardTitle class="line-clamp-2 text-lg">{{ article.title }}</CardTitle>
+              <!-- 使用权限指令控制操作菜单 -->
+              <DropdownMenu v-permission="['articles.edit', 'articles.delete']" v-model:open="openDropdowns[article.id]">
+                <DropdownMenuTrigger as-child>
+                  <Button variant="ghost" size="icon" class="h-8 w-8">
+                    <MoreHorizontal class="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem v-permission="'articles.view'">
+                    <Eye class="mr-2 h-4 w-4" />
+                    查看
+                  </DropdownMenuItem>
+                  <DropdownMenuItem v-permission="'articles.edit'" @click="navigateToEdit(article.id)">
+                    <Edit class="mr-2 h-4 w-4" />
+                    编辑
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator v-permission:all="['articles.edit', 'articles.delete']" />
+                  <DropdownMenuItem 
+                    v-permission="'articles.delete'" 
+                    variant="destructive" 
+                    @click="deleteArticle(article.id, article.title)"
+                  >
+                    <Trash2 class="mr-2 h-4 w-4" />
+                    删除
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <div>{{ article.views }} 次浏览</div>
-          </div>
-          <div class="mt-3 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <Badge :variant="getCategoryBadgeVariant(article.category)">
-                {{ getCategoryText(article.category) }}
-              </Badge>
-              <Badge :variant="getStatusBadgeVariant(article.status)">
-                {{ getStatusText(article.status) }}
-              </Badge>
+            <CardDescription class="line-clamp-3">
+              {{ article.excerpt }}
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="pt-0">
+            <div class="text-muted-foreground flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2">
+                <Calendar class="h-4 w-4" />
+                {{ new Date(article.publishedAt || article.createdAt).toLocaleDateString() }}
+              </div>
+              <div>{{ article.views }} 次浏览</div>
             </div>
-            <div class="text-muted-foreground text-sm">by {{ article.author }}</div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Badge :variant="getCategoryBadgeVariant(article.category)">
+                  {{ getCategoryText(article.category) }}
+                </Badge>
+                <Badge :variant="getStatusBadgeVariant(article.status)">
+                  {{ getStatusText(article.status) }}
+                </Badge>
+              </div>
+              <div class="text-muted-foreground text-sm">by {{ article.author }}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </PermissionWrapper>
 
     <!-- 分页 -->
     <div v-if="pagination.total > pagination.pageSize" class="mt-4 flex items-center justify-between">

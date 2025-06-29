@@ -98,6 +98,7 @@ declare module 'vue' {
     NavMenuItem: typeof import('./src/components/nav/NavMenuItem.vue')['default']
     NavProjects: typeof import('./src/components/NavProjects.vue')['default']
     PdfPreview: typeof import('./src/components/file-preview/PdfPreview.vue')['default']
+    PermissionWrapper: typeof import('./src/components/PermissionWrapper.vue')['default']
     Popover: typeof import('./src/components/ui/popover/Popover.vue')['default']
     PopoverAnchor: typeof import('./src/components/ui/popover/PopoverAnchor.vue')['default']
     PopoverContent: typeof import('./src/components/ui/popover/PopoverContent.vue')['default']
