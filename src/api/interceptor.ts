@@ -1,6 +1,5 @@
 import axios from 'axios'
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { setupMock } from '@/mocks/mock'
 import { useUserStore } from '@/stores/user'
 
 export interface ErrorResponse<T = unknown> {
@@ -14,8 +13,12 @@ if (import.meta.env.VITE_API_BASE_URL) {
   axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
 }
 
-if (import.meta.env.VITE_USE_MOCK) {
-  setupMock(axios)
+// 仅在开发环境下使用模拟数据
+if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK) {
+  const { worker } = await import('@/mocks/browser')
+  await worker.start({
+    onUnhandledRequest: 'bypass',
+  })
 }
 
 axios.interceptors.request.use(
