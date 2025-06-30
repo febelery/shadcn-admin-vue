@@ -8,6 +8,19 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    // 编译生成的模块格式，使用原生 ES 模块，适用于 Vite/Rollup/ESBuild
+    "module": "esnext",
+
+    // 支持所有现代语法（可使用 `??`, `?.`, `import.meta`, `top-level await` 等）
+    "target": "esnext",
+
+    // 使用与构建工具一致的模块解析策略，支持裸模块导入（如 `pinia`、`vue`）
+    "moduleResolution": "bundler",
+
+    // 引入 Vite 环境变量类型（如 `import.meta.env.VITE_API_URL`）
+    // 引入 import.meta.glob 等语法支持
+    "types": ["vite/client"]
   }
 }
