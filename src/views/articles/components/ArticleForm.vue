@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { toTypedSchema } from '@vee-validate/zod'
 import { ArrowLeft, Eye, Save } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -49,16 +49,22 @@ const formSchema = z.object({
     required_error: '请选择文章分类',
   }),
   tags: z
-    .string()
+    .union([z.string(), z.array(z.string())]) // 接受字符串或字符串数组
     .optional()
-    .transform((val) =>
-      val
-        ? val
-            .split(',')
-            .map((tag) => tag.trim())
-            .filter(Boolean)
-        : []
-    ),
+    .transform((val) => {
+      if (!val) return []
+
+      // 如果已经是数组，直接返回
+      if (Array.isArray(val)) {
+        return val.filter(Boolean)
+      }
+
+      // 如果是字符串，按逗号分割
+      return val
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    }),
   status: z.enum(['draft', 'published'], {
     required_error: '请选择发布状态',
   }),
@@ -86,16 +92,7 @@ watch(
   () => props.articleData,
   (articleData) => {
     if (props.mode === 'edit' && articleData) {
-      form.setValues({
-        title: articleData.title,
-        excerpt: articleData.excerpt || '',
-        content: articleData.content || '',
-        cover: articleData.cover || '',
-        attachments: [],
-        category: articleData.category,
-        tags: articleData.tags.join(', '),
-        status: articleData.status,
-      })
+      form.setValues(articleData as any)
     }
   },
   { immediate: true }
@@ -125,7 +122,7 @@ const submitButtonText = computed(() => {
   return props.mode === 'create' ? '发布文章' : '保存更改'
 })
 
-const handleSubmit = form.handleSubmit(async (values) => {
+const handleSubmit = async (values: any) => {
   try {
     if (props.mode === 'create') {
       // 创建模式：直接使用表单值
@@ -138,24 +135,24 @@ const handleSubmit = form.handleSubmit(async (values) => {
         id: props.articleData.id,
         ...values,
       }
-      
+
       await updateArticleApi(updateData)
       const action = values.status === 'published' ? '发布' : '保存'
       toast.success(`文章${action}成功`)
     }
-    
+
     router.push('/articles')
   } catch (error: any) {
     const message = error?.response?.data?.message || `${props.mode === 'create' ? '发布' : '更新'}文章失败`
     toast.error(message)
   }
-})
+}
 
 const goBack = () => {
   router.push('/articles')
 }
 
-// 字段配置
+// 字段配置 - 修改部分
 const fieldConfig = computed(() => ({
   title: {
     label: '标题',
@@ -167,7 +164,7 @@ const fieldConfig = computed(() => ({
   excerpt: {
     label: '摘要',
     description: '文章的简短描述，用于搜索和预览',
-    component: 'textarea',
+    component: 'textarea' as const, // 添加 as const
     inputProps: {
       placeholder: '请输入文章摘要',
     },
@@ -175,7 +172,7 @@ const fieldConfig = computed(() => ({
   content: {
     label: '文章内容',
     description: '文章的详细内容，支持富文本编辑',
-    component: 'editor',
+    component: 'editor' as const, // 添加 as const
     inputProps: {
       mode: 'full',
       class: 'min-h-[400px]',
@@ -191,7 +188,7 @@ const fieldConfig = computed(() => ({
   category: {
     label: '分类',
     description: '选择文章所属的分类',
-    component: 'select',
+    component: 'select' as const, // 添加 as const
   },
   tags: {
     label: '标签',
@@ -203,7 +200,7 @@ const fieldConfig = computed(() => ({
   status: {
     label: '状态',
     description: '选择文章的发布状态',
-    component: 'select',
+    component: 'select' as const, // 添加 as const
   },
 }))
 

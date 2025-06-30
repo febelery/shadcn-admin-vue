@@ -9,7 +9,7 @@ export interface Article {
   author: string
   status: 'published' | 'draft' | 'archived'
   category: string
-  tags: string[]
+  tags: string | string[]
   publishedAt: string
   views: number
   cover: string

@@ -208,11 +208,7 @@ const navigateToCreate = () => {
     </div>
 
     <!-- 使用权限包装器控制文章列表的显示 -->
-    <PermissionWrapper 
-      permission="articles.view" 
-      :show-fallback="true" 
-      fallback-text="您没有权限查看文章列表"
-    >
+    <PermissionWrapper permission="articles.view" :show-fallback="true" fallback-text="您没有权限查看文章列表">
       <div v-if="!loading" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card v-for="article in articles" :key="article.id" class="overflow-hidden">
           <div class="aspect-video overflow-hidden">
@@ -226,32 +222,34 @@ const navigateToCreate = () => {
             <div class="flex items-start justify-between gap-2">
               <CardTitle class="line-clamp-2 text-lg">{{ article.title }}</CardTitle>
               <!-- 使用权限指令控制操作菜单 -->
-              <DropdownMenu v-permission="['articles.edit', 'articles.delete']" v-model:open="openDropdowns[article.id]">
-                <DropdownMenuTrigger as-child>
-                  <Button variant="ghost" size="icon" class="h-8 w-8">
-                    <MoreHorizontal class="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem v-permission="'articles.view'">
-                    <Eye class="mr-2 h-4 w-4" />
-                    查看
-                  </DropdownMenuItem>
-                  <DropdownMenuItem v-permission="'articles.edit'" @click="navigateToEdit(article.id)">
-                    <Edit class="mr-2 h-4 w-4" />
-                    编辑
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator v-permission:all="['articles.edit', 'articles.delete']" />
-                  <DropdownMenuItem 
-                    v-permission="'articles.delete'" 
-                    variant="destructive" 
-                    @click="deleteArticle(article.id, article.title)"
-                  >
-                    <Trash2 class="mr-2 h-4 w-4" />
-                    删除
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div v-permission="['articles.edit', 'articles.delete']">
+                <DropdownMenu v-model:open="openDropdowns[article.id]">
+                  <DropdownMenuTrigger as-child>
+                    <Button variant="ghost" size="icon" class="h-8 w-8">
+                      <MoreHorizontal class="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem v-permission="'articles.view'">
+                      <Eye class="mr-2 h-4 w-4" />
+                      查看
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-permission="'articles.edit'" @click="navigateToEdit(article.id)">
+                      <Edit class="mr-2 h-4 w-4" />
+                      编辑
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator v-permission:all="['articles.edit', 'articles.delete']" />
+                    <DropdownMenuItem
+                      v-permission="'articles.delete'"
+                      variant="destructive"
+                      @click="deleteArticle(article.id, article.title)"
+                    >
+                      <Trash2 class="mr-2 h-4 w-4" />
+                      删除
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
             <CardDescription class="line-clamp-3">
               {{ article.excerpt }}

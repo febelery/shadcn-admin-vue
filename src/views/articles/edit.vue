@@ -46,9 +46,9 @@ onMounted(() => {
       <p class="text-muted-foreground text-sm">正在加载文章数据...</p>
     </div>
   </div>
-  
+
   <ArticleForm v-else-if="articleData" mode="edit" :article-data="articleData" />
-  
+
   <div v-else class="flex items-center justify-center py-8">
     <div class="text-center">
       <p class="text-muted-foreground text-sm">文章数据加载失败</p>

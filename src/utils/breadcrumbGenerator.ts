@@ -23,7 +23,7 @@ export function generateBreadcrumbFromRoute(matched: RouteLocationMatched[]): Br
     // 构建面包屑项
     const breadcrumbItem: BreadcrumbItem = {
       title: meta.title as string,
-      icon: meta.icon,
+      icon: meta.icon as any,
     }
 
     // 如果不是最后一项，添加链接

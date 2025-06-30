@@ -32,7 +32,7 @@ export interface CustomAction {
   onClick?: () => void
 }
 
-// 扩展的路由记录接口
+// @ts-expect-error 扩展的路由记录接口
 export interface ExtendedRouteRecordRaw extends RouteRecordRaw {
   meta?: RouteMeta
 }

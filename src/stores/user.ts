@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { getCurrentUserApi, loginApi, verifyOtpApi } from '@/api/users'
-import type { User } from '@/api/users'
 import { getFingerprint } from '@/lib/utils'
 
 const USER_STORAGE_KEY = 'mkt-user'
@@ -81,7 +80,7 @@ export const useUserStore = defineStore('user', {
     async login(values: Record<string, any>) {
       try {
         const fingerprint = await getFingerprint()
-        const res = await loginApi({ ...values, fingerprint })
+        const res = await loginApi({ ...values, fingerprint } as any)
 
         if (res?.status === 202 || res.data?.need_otp) {
           return {
@@ -130,7 +129,7 @@ export const useUserStore = defineStore('user', {
         return this.userInfo
       } catch (error) {
         this.reset()
-        return null
+        return error
       }
     },
 

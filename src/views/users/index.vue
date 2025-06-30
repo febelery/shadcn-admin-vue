@@ -184,11 +184,7 @@ const navigateToEdit = (id: number) => {
         </div>
 
         <!-- 使用权限包装器控制整个表格的显示 -->
-        <PermissionWrapper 
-          permission="users.view" 
-          :show-fallback="true" 
-          fallback-text="您没有权限查看用户列表"
-        >
+        <PermissionWrapper permission="users.view" :show-fallback="true" fallback-text="您没有权限查看用户列表">
           <Table v-if="!loading">
             <TableHeader>
               <TableRow>
@@ -235,28 +231,30 @@ const navigateToEdit = (id: number) => {
                 </TableCell>
                 <TableCell>
                   <!-- 使用权限指令控制操作按钮 -->
-                  <DropdownMenu v-permission="['users.edit', 'users.delete']">
-                    <DropdownMenuTrigger as-child>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal class="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem v-permission="'users.edit'" @click="navigateToEdit(user.id)">
-                        <Edit class="mr-2 h-4 w-4" />
-                        编辑
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator v-permission:all="['users.edit', 'users.delete']" />
-                      <DropdownMenuItem 
-                        v-permission="'users.delete'" 
-                        variant="destructive" 
-                        @click="deleteUser(user.id, user.name)"
-                      >
-                        <Trash2 class="mr-2 h-4 w-4" />
-                        删除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div v-permission="['users.edit', 'users.delete']">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger as-child>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal class="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem v-permission="'users.edit'" @click="navigateToEdit(user.id)">
+                          <Edit class="mr-2 h-4 w-4" />
+                          编辑
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator v-permission:all="['users.edit', 'users.delete']" />
+                        <DropdownMenuItem
+                          v-permission="'users.delete'"
+                          variant="destructive"
+                          @click="deleteUser(user.id, user.name)"
+                        >
+                          <Trash2 class="mr-2 h-4 w-4" />
+                          删除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </TableCell>
               </TableRow>
             </TableBody>

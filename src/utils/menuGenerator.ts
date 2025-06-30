@@ -23,7 +23,7 @@ function shouldShowInMenu(route: RouteRecordRaw): boolean {
  * @param route 路由记录
  * @returns 是否为菜单根节点
  */
-function isMenuRoot(route: RouteRecordRaw): boolean {
+function isMenuRoot(route: RouteRecordRaw) {
   // 智能判断：顶级路由且有子路由
   const pathSegments = route.path.split('/').filter(Boolean)
   const isTopLevel = pathSegments.length === 1

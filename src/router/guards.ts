@@ -37,7 +37,7 @@ function hasRoutePermission(matched: any[], userPermissions: string[]): boolean 
     ? targetRoute.meta.permission
     : [targetRoute.meta.permission]
 
-  return requiredPermissions.some((permission) => userPermissions.includes(permission))
+  return requiredPermissions.some((permission: any) => userPermissions.includes(permission))
 }
 
 /**
@@ -104,8 +104,10 @@ export function setupRouterGuards(router: Router) {
     // 检查用户是否已登录
     if (!userStore.isLoggedIn) {
       // 未登录，重定向到登录页
-      const redirect = encodeURIComponent(to.fullPath)
-      next(`/login?redirect=${redirect}`)
+      next({
+        name: 'login',
+        query: { redirect: encodeURIComponent(to.fullPath) },
+      })
       return
     }
 
@@ -116,8 +118,10 @@ export function setupRouterGuards(router: Router) {
       } catch (error) {
         // 获取用户信息失败，可能是 token 过期
         userStore.logout()
-        const redirect = encodeURIComponent(to.fullPath)
-        next(`/login?redirect=${redirect}`)
+        next({
+          name: 'login',
+          query: { redirect: encodeURIComponent(to.fullPath) },
+        })
         return
       }
     }
