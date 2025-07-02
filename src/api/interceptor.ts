@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import { toast } from 'vue-sonner'
 import { useUserStore } from '@/stores/user'
 
 export interface ErrorResponse<T = unknown> {
@@ -68,7 +69,8 @@ axios.interceptors.response.use(
     }
 
     if (!error.response || status >= 500) {
-      window.location.href = '/500'
+      // window.location.href = '/500'
+      toast.error('服务器错误，请稍后再试')
     }
 
     return Promise.reject(error?.response || error)
