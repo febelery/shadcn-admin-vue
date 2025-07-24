@@ -37,20 +37,18 @@
           <video :src="currentFileUrl" class="max-h-[90vh] max-w-full" controls autoplay></video>
         </div>
 
-        <!-- Excel 预览 -->
+        <!-- Office 文档预览 (Word/Excel) -->
         <div
-          v-else-if="currentFile && isExcelFile(currentFile)"
-          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center"
+          v-else-if="currentFile && (isExcelFile(currentFile) || isWordFile(currentFile))"
+          class="flex h-[88vh] w-full max-w-7xl items-center justify-center"
         >
-          <ExcelPreview :file="currentFile" :file-url="currentFileUrl" />
-        </div>
-
-        <!-- Word 文档预览 -->
-        <div
-          v-else-if="currentFile && isWordFile(currentFile)"
-          class="flex h-[86vh] w-[96vw] max-w-7xl items-center justify-center"
-        >
-          <DocxPreview :file="currentFile" :file-url="currentFileUrl" />
+          <OfficeEditor
+            :document-file="currentFile"
+            :show-toolbar="false"
+            :allow-create="false"
+            height="88vh"
+            title=""
+          />
         </div>
 
         <!-- PDF 文档预览 -->
@@ -204,8 +202,7 @@ import {
   ZoomOut,
 } from 'lucide-vue-next'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import DocxPreview from './DocxPreview.vue'
-import ExcelPreview from './ExcelPreview.vue'
+import OfficeEditor from './OfficeEditor.vue'
 import PdfPreview from './PdfPreview.vue'
 import { formatFileSize, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile } from './fileUtils'
 

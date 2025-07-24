@@ -1,6 +1,5 @@
 export { default as FilePreview } from './FilePreview.vue'
-export { default as DocxPreview } from './DocxPreview.vue'
-export { default as ExcelPreview } from './ExcelPreview.vue'
 export { default as PdfPreview } from './PdfPreview.vue'
+export { default as OfficeEditor } from './OfficeEditor.vue'
 export * from './fileUtils'
 export type { FilePreviewItem } from './FilePreview.vue'

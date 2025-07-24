@@ -1,4 +1,4 @@
-import { Activity, Bell, Database, Settings, Shield } from 'lucide-vue-next'
+import { Activity, Bell, Database, FileText, Settings, Shield } from 'lucide-vue-next'
 import type { RouteRecordRaw } from 'vue-router'
 
 const system: RouteRecordRaw = {
@@ -16,6 +16,15 @@ const system: RouteRecordRaw = {
   },
   children: [
     {
+      path: 'office',
+      component: () => import('@/views/system/office.vue'),
+      meta: {
+        title: '文档编辑器',
+        icon: FileText,
+        order: 1,
+      },
+    },
+    {
       path: 'settings',
       name: 'system-settings',
       component: () => import('@/views/coming-soon/index.vue'),
@@ -23,8 +32,7 @@ const system: RouteRecordRaw = {
         title: '系统设置',
         icon: Settings,
         permission: 'system.settings',
-        order: 1,
-        // 继承父路由的 requiresAuth: true
+        order: 2,
       },
     },
     {
@@ -35,8 +43,7 @@ const system: RouteRecordRaw = {
         title: '数据库管理',
         icon: Database,
         permission: 'system.database',
-        order: 2,
-        // 继承父路由的 requiresAuth: true
+        order: 3,
       },
     },
     {
@@ -47,8 +54,7 @@ const system: RouteRecordRaw = {
         title: '安全设置',
         icon: Shield,
         permission: 'system.security',
-        order: 3,
-        // 继承父路由的 requiresAuth: true
+        order: 4,
       },
     },
     {
@@ -59,9 +65,8 @@ const system: RouteRecordRaw = {
         title: '通知管理',
         icon: Bell,
         permission: 'system.notifications',
-        order: 4,
+        order: 5,
         badge: 'NEW',
-        // 继承父路由的 requiresAuth: true
       },
     },
     {
@@ -72,8 +77,7 @@ const system: RouteRecordRaw = {
         title: '系统日志',
         icon: Activity,
         permission: 'system.logs',
-        order: 5,
-        // 继承父路由的 requiresAuth: true
+        order: 6,
       },
     },
   ],
