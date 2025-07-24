@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/user'
  * 检查路由是否需要认证（支持父子路由继承）
  * @param matched 路由匹配记录数组
  * @returns 是否需要认证
+ * @description 如果路由没有明确设置 requiresAuth，默认为 false（不需要认证）
  */
 function requiresAuthentication(matched: any[]): boolean {
   // 从父到子遍历路由，如果任何一级设置了 requiresAuth，则继承该设置
@@ -15,8 +16,7 @@ function requiresAuthentication(matched: any[]): boolean {
     }
   }
 
-  // 如果没有明确设置，默认需要认证
-  return true
+  return false
 }
 
 /**

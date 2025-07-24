@@ -6,7 +6,6 @@ const login: RouteRecordRaw = {
   component: () => import('@/views/auth/login.vue'),
   meta: {
     title: '登录',
-    requiresAuth: false, // 明确标记登录页不需要认证
   },
 }
 

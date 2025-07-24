@@ -7,7 +7,6 @@ const errors: RouteRecordRaw[] = [
     component: () => import('@/views/errors/401.vue'),
     meta: {
       title: '未授权',
-      requiresAuth: false, // 错误页面不需要认证
     },
   },
   {
@@ -16,7 +15,6 @@ const errors: RouteRecordRaw[] = [
     component: () => import('@/views/errors/403.vue'),
     meta: {
       title: '禁止访问',
-      requiresAuth: false,
     },
   },
   {
@@ -25,7 +23,6 @@ const errors: RouteRecordRaw[] = [
     component: () => import('@/views/errors/500.vue'),
     meta: {
       title: '服务器错误',
-      requiresAuth: false,
     },
   },
   {
@@ -34,7 +31,6 @@ const errors: RouteRecordRaw[] = [
     component: () => import('@/views/errors/404.vue'),
     meta: {
       title: '页面未找到',
-      requiresAuth: false,
     },
   },
 ]
